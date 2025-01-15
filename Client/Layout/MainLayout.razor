@@ -1,0 +1,56 @@
+﻿@using CIVSUI.Pages.Auth
+
+@using System.IdentityModel.Tokens.Jwt
+@inject ILocalStorageService localStorageService
+@using System.Security.Claims;
+@inherits LayoutComponentBase
+
+<div class="page">
+   <AuthorizeView>
+        <Authorized>
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+            <main>
+                <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #ededed;">
+                    <div class="container-fluid">
+                        <div></div>
+                        <div class="dropdown">
+                            <div>@DisplayName</div>
+                            <div style="font-size: 12px;">
+                                Last login on @LastLoginDateTime
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                 
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
+        </Authorized>
+        <NotAuthorized>
+            <main>
+                <article class="content px-4">
+                    <Login />
+                </article>
+            </main>
+        </NotAuthorized>
+   </AuthorizeView>
+   
+    <script src="js/downloadHelpers.js"></script>
+    <script src="js/site.js"></script>
+</div>
+
+@code{
+    string DisplayName = "";
+    string LastLoginDateTime = "";
+    protected override async Task OnInitializedAsync()
+    {
+        var jwtToken = await localStorageService.GetItemAsStringAsync("auth")!;
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.ReadJwtToken(jwtToken);
+        DisplayName = token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+        LastLoginDateTime = token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.DateOfBirth)?.Value;
+    }
+}

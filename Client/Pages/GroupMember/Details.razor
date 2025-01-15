@@ -1,0 +1,59 @@
+﻿@page "/group-member/details/{Id}"
+@using Application.Models
+@using WebAPI
+
+<h3>Group Member Details</h3>
+
+<div class="col-lg-12">
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="fw-bold">Group</div>
+            <div class="fw-bold">Members</div>
+            <div class="fw-bold">Deleted</div>
+        </div>
+        <div class="col-sm-9 display-block">
+            <div class="">@GroupMemberModel.GroupDesc</div>
+            <div class="">@GroupMemberModel.UserTypesDesc</div>
+            <div class="">
+                <input class="form-check-input" type="checkbox" value="@GroupMemberModel.Isdeleted" checked="@GroupMemberModel.Isdeleted" disabled>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mt-3">
+    <a class="btn btn-link" href="/group-member">Back to list</a>
+    <a class="btn btn-link" href="/group/details/@Id">Back to group</a>
+</div>
+
+<LoadingModal @ref="MdlLoading" IsLoading="isLoading"></LoadingModal>
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    GroupMemberModel GroupMemberModel = new();
+    private LoadingModal MdlLoading;
+    private bool isLoading = false;
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Initialize();
+    }
+
+    protected async Task Initialize()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await GroupMemberServices.GroupMemberDetails(int.Parse(Id));
+        if (result.StatusCode == "00")
+        {
+            GroupMemberModel = result.Data;
+            StateHasChanged();
+            isLoading = false;
+        }
+    }
+
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+}

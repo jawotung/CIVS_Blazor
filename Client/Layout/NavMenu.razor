@@ -1,0 +1,416 @@
+﻿@using Blazored.LocalStorage
+@using CIVSUI.States
+@using System.IdentityModel.Tokens.Jwt
+@inject ILocalStorageService localStorageService
+@using System.Security.Claims;
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+@inject AuthenticationStateProvider AuthStateProvider
+
+<style>
+    .nav-link:has(.nav-submenu) .nav-submenu {
+        color:blue;
+    }
+    .nav-submenu a{
+        font-size: 10px!important;
+    }
+</style>
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <img src="css/img/boclogo.png" style="width:40px;height:45px"/>
+        <a class="navbar-brand" href="/home">BOC CIVS</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3" style="font-size: 12px;">
+            <NavLink class="nav-link" href="/home" Match="NavLinkMatch.All">
+                <span class="fa fa-home" style="margin-right:10px" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        @if (userMenu != null)
+        {
+            @foreach (string menuItems in userMenu)
+            {
+                string[] rootMenuItem = menuItems.Split('@');
+                string rootMenu = rootMenuItem[0].ToString();
+
+                string[] subMenuItem = rootMenuItem[1].Split(",");
+                <div class="nav-item px-3" style="font-size: 12px;">
+                    <NavLink class="nav-link" @onclick="() => ToggleNav(rootMenu)">
+                        <span class="@MenuIcon[rootMenu]" style="margin-right:10px" aria-hidden="true"></span>@rootMenu
+                    </NavLink>
+                    <div class="@(activeNav == @rootMenu && IsActive == false ? "show" : "hide") px-3 nav-submenu">
+                        @foreach (string subItems in subMenuItem)
+                        {
+                            string[] subItemList = subItems.Split("#");
+                            string subItem = subItemList[0].ToString();
+
+                            string[] controllerActionList = subItemList[1].Split("$");
+                            string controllerItem = controllerActionList[0].ToString();
+
+
+                            string[] actionItemList = controllerActionList[1].Split("?");
+                            string actionItem = actionItemList[0].ToString();
+                            string routeItem = actionItemList.Length > 1 ? actionItemList[1].ToString() : "";
+
+                            Dictionary<string, string> allRouteData = new Dictionary<string, string> { { "key", @routeItem } };
+                            string subNavUrl = subItem.ToLower().Replace(" ", "-");
+
+                            if(rootMenu == "Administration")
+                            {
+                                if (subItem == "System Users")
+                                {
+                                    subNavUrl = $"{subNavUrl}/administrator";
+                                }
+                                if (subItem == "User Amount Limit")
+                                {
+                                    subNavUrl = $"{subNavUrl}/administrator";
+                                }
+                                if (subItem == "Disabled User List")
+                                {
+                                    subNavUrl = $"system-users/Disabled";
+                                }
+                                if (subItem == "Deactivated User List")
+                                {
+                                    subNavUrl = $"system-users/Deactivated";
+                                }
+                            }
+
+                            if (rootMenu == "Cheque Processing")
+                            {
+                                subNavUrl = "inward-clearing-cheque";
+                                if (subItem == "Upload Check Images From CICS")
+                                {
+                                    subNavUrl = $"{subNavUrl}/create";
+                                }
+                                if (subItem == "Signature Verification")
+                                {
+                                    subNavUrl = $"{subNavUrl}/cheque-processing";
+                                }
+                                if (subItem == "Next Level Appover")
+                                {
+                                    subNavUrl = $"{subNavUrl}/cheque-processing-next-level/RO";
+                                }
+                            }
+
+                            if (rootMenu == "Cheque Processing Verifier")
+                            {
+                                subNavUrl = "inward-clearing-cheque";
+                                if (subItem == "Signature Verification")
+                                {
+                                    subNavUrl = $"{subNavUrl}/verifier";
+                                }
+                                if (subItem == "Next Level Appover")
+                                {
+                                    subNavUrl = $"{subNavUrl}/verifier-next-level/RO";
+                                }
+                            }
+                            
+                            if (rootMenu == "Clearing Parameters")
+                            {
+                                if (subItem == "Reject Reason Parameter")
+                                {
+                                    subNavUrl = $"reject-reason/clearing-parameters";
+                                }
+                                if (subItem == "Amount Limits")
+                                {
+                                    subNavUrl = $"amount-limits/clearing-parameters";
+                                }
+                                if (subItem == "Branch Buddy BCP")
+                                {
+                                    subNavUrl = $"/branch-buddy-bcp/clearing-parameters";
+                                }
+                                if (subItem == "User Amount Limit")
+                                {
+                                    subNavUrl = $"user-amount-limit/clearing-parameters";
+                                }
+                            }
+
+                            if(rootMenu == "Parameters")
+                            {
+                                if (subItem == "Branch Parameters")
+                                {
+                                    subNavUrl = $"/branch";
+                                }
+                                if (subItem == "Group Parameter")
+                                {
+                                    subNavUrl = $"/group";
+                                }
+                                if (subItem == "Menu Parameter")
+                                {
+                                    subNavUrl = $"/menu";
+                                }
+                                if (subItem == "User Type Parameter")
+                                {
+                                    subNavUrl = $"{subNavUrl.Replace("-parameter", "")}";
+                                }
+                                if (subItem == "Reject Reason Parameter")
+                                {
+                                    subNavUrl = $"{subNavUrl.Replace("-parameter", "")}/parameters";
+                                }
+                                if (subItem == "Amount Limits")
+                                {
+                                    subNavUrl = $"{subNavUrl.Replace("-parameter", "")}/parameters";
+                                }
+                                if (subItem == "User Amount Limit")
+                                {
+                                    subNavUrl = $"{subNavUrl.Replace("-parameter", "")}/parameters";
+                                }
+                            }
+
+                            if (@rootMenu == "Signature Verification Report List")
+                            {
+                                subNavUrl = "/inward-clearing-cheque-report";
+                                subItem = subItem.Replace("Signature Verification", "").Trim();
+                                if (subItem == "Accepted Report")
+                                {
+                                    subNavUrl = $"{subNavUrl}/accept";
+                                }
+                                if (subItem == "Rejected Report")
+                                {
+                                    subNavUrl = $"{subNavUrl}/Reject";
+                                }
+                                if (subItem == "Re-assigned Report")
+                                {
+                                    subNavUrl = $"{subNavUrl}/ReAssign";
+                                }
+                                if (subItem == "Next Level Approver Report")
+                                {
+                                    subNavUrl = $"{subNavUrl}/ReferToOfficer";
+                                }
+                                if (subItem == "Open Report")
+                                {
+                                    subNavUrl = $"{subNavUrl}/Open";
+                                }
+                                if (subItem == "Uploaded Report")
+                                {
+                                    subNavUrl = $"{subNavUrl}/Upload";
+                                }
+                                if (subItem == "Large Amount Items")
+                                {
+                                    subNavUrl = $"{subNavUrl}/LargeAmount^99999";
+                                }
+                                if (subItem == "Item list with Technicalities")
+                                {
+                                    subNavUrl = $"{subNavUrl}/WithTechnicalities";
+                                }
+                                if (subItem == "MC Image with Details")
+                                {
+                                    subNavUrl = $"{subNavUrl}/MCImages";
+                                }
+                                if (subItem == "Closed Account Report")
+                                {
+                                    subNavUrl = $"{subNavUrl}/AcctClsd";
+                                }
+                                if (subItem == "Dormant Account Report")
+                                {
+                                    subNavUrl = $"{subNavUrl}/AcctDrmt";
+                                }
+                                if (subItem == "Post No Debit Account Report")
+                                {
+                                    subNavUrl = $"{subNavUrl}/AcctPnD";
+                                }
+                            }
+
+                            <NavLink class="nav-link" href="@subNavUrl">
+                                <span class="fa fa-circle" style="margin-right:10px" aria-hidden="false"></span>@subItem
+                            </NavLink>                            
+                        }
+                    </div>
+                </div>
+            }
+        }
+       
+        <div class="nav-item px-3" style="font-size: 12px;">
+            <NavLink class="nav-link" @onclick="OnClickLogout">
+                <span class="fa fa-power-off" style="margin-right:10px" aria-hidden="true"></span> Logout
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+<ConfirmationToast @ref="Confirmation"
+                   ConfimationMsg="Are you sure you want to logout due to inactivity?"
+                   OnConfirm="ConfirmLogout"
+                   IsVisible="@IsConfirmationModalVisible">
+</ConfirmationToast>
+@inject NavigationManager NavigationManager
+@code {
+    private ConfirmationToast Confirmation { get; set; }
+    private bool IsConfirmationModalVisible = false;
+    private string ConfimationMsg = string.Empty;
+
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private string[] userMenu;
+    private string activeNav = string.Empty;
+    private bool IsActive = false;
+    private Dictionary<string, string> MenuIcon = new Dictionary<string, string>
+    {
+        {"Administration", "fa fa-user"},
+        {"Clearing Parameters", "fa fa-edit"} ,
+        {"Parameters", "fa fa-edit"} ,
+        {"Cheque Processing", "fa fa-upload"} ,
+        {"Cheque Processing Verifier", "fa fa-check"} ,
+        {"Signature Verification Report List", "fa fa-file"},
+    };
+    protected override async void OnInitialized()
+    {
+        await GetMenu();
+        NavigationManager.LocationChanged += HandleLocationChanged;
+        string currentUrl = NavigationManager.Uri;
+        Uri uri = new Uri(currentUrl);
+        string URL = uri.AbsolutePath;
+        ShowParent(URL);
+
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            NavigationManager.LocationChanged += HandleLocationChanged;
+        }
+    }
+    private void HandleLocationChanged(object sender, LocationChangedEventArgs args)
+    {
+        string newUrl = args.Location;
+        Uri uri = new Uri(newUrl);
+        string URL = uri.AbsolutePath;
+        ShowParent(URL);
+    }
+    private void ShowParent(string URL)
+    {
+        if (URL == "/user" ||
+           URL == "/user-amount-limit/administrator" ||
+           URL == "/user/Disabled" ||
+           URL == "/user/Deactivated")
+        {
+            activeNav = "Administration";
+        }
+        else if (URL == "/reject-reason/clearing-parameters" ||
+                URL == "/user-amount-limit/clearing-parameters" ||
+                URL == "/branch-buddy-bcp/clearing-parameters" ||
+                URL == "/amount-limits/clearing-parameters")
+        {
+            activeNav = "Clearing Parameters";
+        }
+        else if (URL == "/branch" ||
+                URL == "/group" ||
+                URL == "/menu" ||
+                URL == "/user-type" ||
+                URL == "/reject-reason/parameters" ||
+                URL == "/email-template" ||
+                URL == "/user-amount-limit/parameters" ||
+                URL == "/amount-limits/parameters")
+        {
+            activeNav = "Parameters";
+        }
+        else if (URL == "/inward-clearing-cheque/create" ||
+                 URL == "/inward-clearing-cheque/cheque-processing" ||
+                 URL == "/inward-clearing-cheque/cheque-processing-next-level/RO"
+        )
+        {
+            activeNav = "Cheque Processing";
+        }
+        else if (URL == "/inward-clearing-cheque/verifier" ||
+                 URL == "/inward-clearing-cheque/verifier-next-level/RO"
+        )
+        {
+            activeNav = "Cheque Processing Verifier";
+        }
+        else if (URL == "/inward-clearing-cheque-report/Accept" ||
+                URL == "/inward-clearing-cheque-report/Reject" ||
+                URL == "/inward-clearing-cheque-report/ReAssign" ||
+                URL == "/inward-clearing-cheque-report/ReferToOfficer" ||
+                URL == "/inward-clearing-cheque-report/Open" ||
+                URL == "/inward-clearing-cheque-report/Upload" ||
+                URL == "/inward-clearing-cheque-report/LargeAmount" ||
+                URL == "/inward-clearing-cheque-report/WithTechnicalities" ||
+                URL == "/inward-clearing-cheque-report/MCImages" ||
+                URL == "/inward-clearing-cheque-report/AcctClsd" ||
+                URL == "/inward-clearing-cheque-report/AcctDrmt" ||
+                URL == "/inward-clearing-cheque-report/AcctPnD"
+        )
+        {
+            activeNav = "Signature Verification Report List";
+        }
+        StateHasChanged();
+    }
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+    private async void OnClickLogout()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await AuthServices.AuthLogout("");
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null!);
+        NavManager.NavigateTo("/", forceLoad: true);
+    }
+
+    private async Task GetMenu()
+    {
+        var jwtToken = await localStorageService.GetItemAsStringAsync("auth")!;
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.ReadJwtToken(jwtToken);
+        var nameIdentifierClaim = token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value;
+        userMenu = nameIdentifierClaim.Split(", ")[4].Split("|");
+    }
+
+    private void ToggleNav(string nav)
+    {
+        IsActive = (nav == activeNav && IsActive == false);
+        activeNav = nav;
+    }
+
+    private DotNetObjectReference<NavMenu> _dotNetRef;
+    private Timer _timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _dotNetRef = DotNetObjectReference.Create(this);
+        await JSRuntime.InvokeVoidAsync("startIdleTimer", _dotNetRef);
+    }
+
+    [JSInvokable]
+    public async void IdleLogout()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        IsConfirmationModalVisible = true;
+        StateHasChanged();
+    }
+
+    protected async Task ConfirmLogout(bool IsConfirmed)
+    {
+        if (IsConfirmed)
+        {
+            OnClickLogout();
+        }
+        IsConfirmationModalVisible = false;
+    }
+    public async ValueTask DisposeAsync()
+    {
+        _dotNetRef?.Dispose();
+        if (_timer != null)
+        {
+            await _timer.DisposeAsync();
+        }
+    }
+
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+}

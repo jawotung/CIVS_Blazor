@@ -1,0 +1,36 @@
+﻿<div class="modal" style="@ConfimationModalStyle">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: rgb(21 60 132); color: white; display: flex; justify-content: space-between; align-items: center;">
+                <h1 class="modal-title fs-4">@ConfimationTitle</h1>
+                <button type="button" data-bs-dismiss="modal" @onclick="() => Confirm(false)" aria-label="Close" style="background-color: transparent;border: none;color: white;">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                @ConfimationMsg
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @onclick="() => Confirm(true)">Confirm</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => Confirm(false)">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (IsVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+@code {
+    [Parameter] public string ConfimationTitle { get; set; } = "Confimation";
+    [Parameter] public string ConfimationMsg { get; set; }
+    [Parameter] public EventCallback<bool> OnConfirm { get; set; }
+    [Parameter] public bool IsVisible { get; set; }
+    private string ConfimationModalStyle => IsVisible ? "display: block;" : "display: none;";
+
+    private async Task Confirm(bool IsConfirm)
+    {
+        await OnConfirm.InvokeAsync(IsConfirm);
+    }
+}

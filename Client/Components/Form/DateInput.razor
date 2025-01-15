@@ -1,0 +1,53 @@
+﻿<input @ref="inputElement"
+       @oninput="@((x) => { OnInput((string)x.Value); })"
+       @onchange="@((x) => { OnDateChanged((string)x.Value); })"
+       class="form-control" 
+       type="date"/>
+@using System.Text.RegularExpressions;
+@inject IJSRuntime JSRuntime
+@code {
+    [Parameter] public DateTime Value { get; set; }
+    [Parameter] public EventCallback<DateTime> ValueChanged { get; set; }
+    private ElementReference inputElement;
+
+    protected override void OnInitialized()
+    {
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Yield(); // Ensure rendering is complete
+            Value = DateTime.Today;
+            await Task.Delay(100);
+            await JSRuntime.InvokeVoidAsync("inputDateToday", inputElement, Value.ToString("yyyy-MM-dd"));
+            await ValueChanged.InvokeAsync(Value);
+        }
+    }
+    private async Task OnInput(string value)
+    {
+        if (DateTime.TryParse(value.ToString(), out var result))
+        {
+            Value = result;
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("validateDate", inputElement);
+            Value = Convert.ToDateTime(await JSRuntime.InvokeAsync<string>("GetElValue", inputElement));
+        }
+        await ValueChanged.InvokeAsync(Value);
+    }
+    private async Task OnDateChanged(string value)
+    {
+        if (DateTime.TryParse(value.ToString(), out var result))
+        {
+            Value = result;
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("validateDate", inputElement);
+            Value = Convert.ToDateTime(await JSRuntime.InvokeAsync<string>("GetElValue", inputElement));
+        }
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

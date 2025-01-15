@@ -1,0 +1,262 @@
+﻿@using Application.Models
+@using WebAPI
+@using NetcodeHub.Packages.Components.Validations.OnInput
+
+<UIModal Title="MC Image Details" ModalSize="modal-lg" @ref="uiModal">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link @liTabImageFrontCSS" @onclick="() => TabImageClick(true)" style="padding: 10px;">Front</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @liTabImageBackCSS" @onclick="() => TabImageClick(false)" style="padding: 10px;">Back</a>
+        </li>
+    </ul>
+    <div class="row">
+        <div class="col-sm-12 @TabImageFrontCSS">
+            @if (HistoryData.ChequeImageFileContentF != "data: image/jpeg; base64 , noimages.png")
+            {
+                <img id="CheckNoImageF" src="@HistoryData.ChequeImageFileContentF" class="img-fluid"  />
+            }
+            else
+            {
+                <img src="img/noimages.png" class="img-fluid"/>
+            }
+        </div> 
+        <div class="col-sm-12 @TabImageBackCSS">
+            @if (HistoryData.ChequeImageFileContentR != "data: image/jpeg; base64 , noimages.png")
+            {
+                <img id="CheckNoImageF" src="@HistoryData.ChequeImageFileContentR" class="img-fluid" @onclick="() => TabImageClick(false)" />
+            }
+            else
+            {
+                <img src="img/noimages.png" class="img-fluid"/>
+            }
+        </div>   
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">Account Number</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@HistoryData.AccountNumber</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">Check Number</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@HistoryData.CheckNumber</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">Check Amount</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@HistoryData.CheckAmount</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">Branch BRSTN</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@HistoryData.BRSTN</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">Effectivity Date</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@HistoryData.EffectivityDate</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">Check Status</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@HistoryData.CheckStatus</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">Reason Final</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@HistoryData.Reason</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">Verified By</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@HistoryData.VerifiedBy</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">Verified DateTime</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@HistoryData.VerifiedDateTime</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">Approved By</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@HistoryData.ApprovedBy</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">ApprovedDateTime</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@HistoryData.ApprovedDateTime</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3 text-center">
+            <label class="lblField">History</label>
+        </div>
+        @if (HistoryData.ChequeStats != null)
+        {
+            <div class="col-sm-9">
+                <ul>
+                    @if (HistoryData.ChequeStats[ChequeStats.Upload] != string.Empty)
+                    {
+                        <li>
+                            @HistoryData.ChequeStats[ChequeStats.Upload]
+                        </li>
+                    }
+                    @if (HistoryData.ChequeStats[ChequeStats.Accept] != string.Empty)
+                    {
+                        <li>
+                            @HistoryData.ChequeStats[ChequeStats.Accept]
+                        </li>
+                    }
+                    @if (HistoryData.ChequeStats[ChequeStats.Reject] != string.Empty)
+                    {
+                        <li>
+                            @HistoryData.ChequeStats[ChequeStats.Reject]
+                        </li>
+                    }
+                    @if (HistoryData.ChequeStats[ChequeStats.ReAssign] != string.Empty)
+                    {
+                        <li>
+                            @HistoryData.ChequeStats[ChequeStats.ReAssign]
+                        </li>
+                    }
+                    @if (HistoryData.ChequeStats[ChequeStats.ReferToOfficer] != string.Empty)
+                    {
+                        <li>
+                            @HistoryData.ChequeStats[ChequeStats.ReferToOfficer]
+                        </li>
+                    }
+                    @if (HistoryData.ChequeStats[ChequeStats.COAccept] != string.Empty)
+                    {
+                        <li>
+                            @HistoryData.ChequeStats[ChequeStats.COAccept]
+                        </li>
+                    }
+                    @if (HistoryData.ChequeStats[ChequeStats.COReject] != string.Empty)
+                    {
+                        <li>
+                            @HistoryData.ChequeStats[ChequeStats.COReject]
+                        </li>
+                    }
+                    @if (HistoryData.ChequeStats[ChequeStats.COReAssign] != string.Empty)
+                    {
+                        <li>
+                            @HistoryData.ChequeStats[ChequeStats.COReAssign]
+                        </li>
+                    }
+                    @if (HistoryData.ChequeStats[ChequeStats.BrAccept] != string.Empty)
+                    {
+                        <li>
+                            @HistoryData.ChequeStats[ChequeStats.BrAccept]
+                        </li>
+                    }
+                    @if (HistoryData.ChequeStats[ChequeStats.BrReject] != string.Empty)
+                    {
+                        <li>
+                            @HistoryData.ChequeStats[ChequeStats.BrReject]
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+    <div class="row">
+        <div class="col-sm-2">
+            <button type="button" class="btn btn-secondary w-100" data-dismiss="modal" @onclick="() => uiModal.CloseModal()">Close</button>
+        </div>
+    </div>
+</UIModal>
+
+
+@code
+{
+    [Parameter]
+    public CIVSUI.Pages.InwardClearingCheque.Report ParentPage { get; set; }
+    private UIModal uiModal;
+    public MCCheckDetailModel HistoryData = new();
+    public ChequeStats ChequeStats = new ChequeStats();
+
+    private bool TabImageActive = true;
+    private string? liTabImageFrontCSS => TabImageActive ? "active" : "";
+    private string? liTabImageBackCSS => !TabImageActive ? "active" : "";
+
+    private string? TabImageFrontCSS => TabImageActive ? "show" : "hide";
+    private string? TabImageBackCSS => !TabImageActive ? "show" : "hide";
+
+    private void TabImageClick(bool x)
+    {
+        TabImageActive = x;
+    }
+    public void PopulateForm(MCCheckDetailModel x)
+    {
+        HistoryData = x;
+        uiModal.ShowModal();
+    }
+}

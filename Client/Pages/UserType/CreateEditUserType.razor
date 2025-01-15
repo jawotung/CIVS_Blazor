@@ -1,0 +1,88 @@
+﻿@using Application.Models
+@using WebAPI
+@using NetcodeHub.Packages.Components.Validations.OnInput
+
+<UIModal Title="User Type" ModalSize="modal-md" @ref="uiModal">
+    <EditForm Model="FormData" OnValidSubmit="Submit">
+        <DataAnnotationsValidator />
+        <div class="form">
+            <input type="hidden" id="id" @bind="FormData.Id" />
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="mb-3">
+                        <label class="form-label">User Type Code<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.UserTypeCode" Label="UserTypeCode" Type="text" class="form-control" disabled="@IsUserTypeCodeDisabled" />
+                        <ValidationMessage For="@(() => FormData!.UserTypeCode)" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="mb-3">
+                        <label class="form-label">User Type Desc<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.UserTypeDesc" Label="UserTypeDesc" Type="text" class="form-control" disabled="@IsDisabled" />
+                        <ValidationMessage For="@(() => FormData!.UserTypeDesc)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3 @FooterCol">
+                <button type="button" class="btn btn-secondary btn btn-secondary w-100" data-dismiss="modal" @onclick="() => uiModal.CloseModal()">Close</button>
+            </div>
+            <div class="col-sm-3 @SaveSubmit">
+                <button type="submit" class="btn btn-primary btn btn-secondary w-100">Save</button>
+            </div>
+        </div>
+    </EditForm>
+</UIModal>
+@inject IUserTypeServices UserTypeService
+@code {
+    [Parameter]
+    public CIVSUI.Pages.UserType.UserType ParentPage { get; set; }
+    private UIModal uiModal;
+    public UserTypeModel FormData = new();
+    public List<SelectListItem> DDlAllowedAction;
+    private ReturnGenericStatus OutputData = new();
+    private bool IsDisabled;
+    private bool IsUserTypeCodeDisabled;
+    private string FooterCol = "offset-sm-8";
+    private string SaveSubmit = "show";
+
+    public async Task CreateNew()
+    {
+        FormData = new();
+        Clear();
+        uiModal.ShowModal();
+    }
+    public async Task PopulateForm(UserTypeModel x, bool IsEdit)
+    {
+        Clear();
+        if (IsEdit)
+        {
+            IsUserTypeCodeDisabled = true;
+        }
+        else
+        {
+            SaveSubmit = "hide";
+            FooterCol = "offset-sm-9";
+            IsUserTypeCodeDisabled = true;
+            IsDisabled = true;
+        }
+        FormData = x;
+        uiModal.ShowModal();
+    }
+    public async Task Submit()
+    {
+        OutputData = await ParentPage.SaveUserType();
+        if (OutputData.StatusCode == "00")
+            uiModal.CloseModal();
+    }
+    public void Clear()
+    {
+        FooterCol = "offset-sm-6"; 
+        SaveSubmit = "show";
+        IsUserTypeCodeDisabled = false;
+        IsDisabled = false;
+    }
+}

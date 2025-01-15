@@ -1,0 +1,41 @@
+﻿<input @bind=@Value
+       @onkeydown=OnKeyDown
+       @onkeydown:preventDefault=@PreventDefault
+       @oninput="@((x) => { OnInput((string)x.Value); })" 
+       class="form-control"
+       type="text"
+       disabled="@IsDisabled" />
+@using System.Text.RegularExpressions;
+@inject IJSRuntime JSRuntime
+@code {
+    [Parameter] public double Value { get; set; }
+    [Parameter] public bool IsDisabled { get; set; }
+    [Parameter] public EventCallback<double> ValueChanged { get; set; }
+
+    private string inputValue;
+    private bool PreventDefault = false;
+
+    protected override void OnInitialized()
+    {
+        inputValue = Value.ToString();
+    }
+    private async Task OnInput(string value)
+    {
+        if (double.TryParse(value.ToString(), out var result))
+        {
+            Value = result;
+            await ValueChanged.InvokeAsync(Value);
+        }
+        inputValue = Value.ToString();
+    }
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        // Allow control keys
+         if (e.Key == "Backspace" || e.Key == "Delete" || e.Key == "ArrowLeft" || e.Key == "ArrowRight" || e.Key == "Tab")
+         {
+             PreventDefault = false;
+             return;
+         }
+         PreventDefault = !Regex.IsMatch(e.Key, @"^[0-9]*(\.[0-9]*)?$");
+    }
+}

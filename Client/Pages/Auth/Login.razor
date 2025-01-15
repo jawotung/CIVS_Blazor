@@ -1,0 +1,76 @@
+﻿@page "/"
+@using Application.Models
+@using CIVSUI.States
+@using NetcodeHub.Packages.Components.Validations.OnInput
+
+<div class="d-flex justify-content-center">
+    <div class="card text-center col-4 bg-light shadow-lg">
+        <div class="card-header" style="background-color: rgb(21 60 132);color: white;">
+            Login
+        </div>
+        <div class="card-body">
+            <div class="row justify-content-center" id="headerDiv">
+                <h1 class="col-12 align-middle" tabindex="-1" style="font-family: sans-serif;">
+                    <img class="img-fluid col-2 align-middle" src="css/img/boclogo.png" style="margin-right: 10px;"> CIVS
+                </h1>
+            </div>
+            @if (!string.IsNullOrEmpty(Message)) {
+                <div class="alert alert-danger mb-3">@Message</div>
+            }
+            <EditForm Model="LoginModel" OnValidSubmit="ValidateCredentials">
+                <DataAnnotationsValidator />
+                <FloatingText @bind-Value="LoginModel.UserId" Label="UserId" Type="text" class="form-control mb-3" />
+                <FloatingText @bind-Value="LoginModel.Password" Label="Password" Type="password" class="form-control mb-3" />
+                <button type="submit" class="btn btn-primary mb-3">Login</button>
+                <ValidationSummary class="text-danger" />
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+<LoadingModal @ref="MdlLoading" IsLoading="isLoading"></LoadingModal>
+
+@inject IJSRuntime JSRuntime
+@code {
+    private LoadingModal MdlLoading;
+    private bool isLoading = false;
+    string? Message = string.Empty;
+    ParamLoginCredentials LoginModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Logout();
+    }
+    async Task ValidateCredentials()
+    {
+        isLoading = true;
+        Message = null;
+        var result = await AuthServices.ValidateCredentials(LoginModel);
+        if (result.StatusCode == "00")
+        {
+            var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthStateProvider;
+            await customAuthStateProvider.UpdateAuthenticationState(result.AccessToken);
+            NavManager.NavigateTo("/home", forceLoad: true);
+        }
+        else
+        {
+            Message = result.StatusMessage;
+        }
+        StateHasChanged();
+        isLoading = false;
+    }
+
+    private async Task Logout()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null!);
+        string token = await localStorageService.GetItemAsStringAsync("auth")!;
+        if (!string.IsNullOrEmpty(token))
+        {
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var result = await AuthServices.AuthLogout("");
+            NavManager.NavigateTo("/", forceLoad: true);
+        }
+    }
+}

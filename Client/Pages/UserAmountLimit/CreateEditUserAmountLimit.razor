@@ -1,0 +1,169 @@
+﻿@using Application.Models
+@using WebAPI
+@using NetcodeHub.Packages.Components.Validations.OnInput
+
+<UIModal Title="User Amount Limit" ModalSize="modal-md" @ref="uiModal">
+    <EditForm Model="FormData" OnValidSubmit="Submit">
+        <DataAnnotationsValidator />
+        <div class="form">
+            <input type="hidden" id="id" @bind="FormData.Id" />
+            <div class="row @(BIsEdit | BIsDisplay ? "hide" : "show")">
+                <div class="col-sm-12">
+                    <div class="mb-3">
+                        <label class="form-label">User Type<span class="text-danger">*</span></label>
+                        <select value="@FormData.UserType" @onchange="(e) => SelectUserType(e)" class="form-control">
+                            <option value="">-- Select an option --</option>
+                            @if (DDlUserType != null)
+                                @foreach (SelectListItem x in DDlUserType)
+                                {
+                                    <option value="@x.Value">@x.Text</option>
+                                }
+                        </select>
+                        <ValidationMessage For="@(() => FormData!.UserType)" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="mb-3">
+                        <label class="form-label">User Id<span class="text-danger">*</span></label>
+                        <select @bind="FormData.UserId" class="form-control @(BIsEdit | BIsDisplay ? "hide" : "show")" disabled="@IsUserAmountLimitCodeDisabled">
+                            <option value="">-- Select an option --</option>
+                            @if (DDlUserId != null)
+                                @foreach (SelectListItem x in DDlUserId)
+                                {
+                                    <option value="@x.Value">@x.Text</option>
+                                }
+                        </select>
+                        <input type="text" value="@FormData.UserId" class="form-control @(BIsEdit | BIsDisplay ? "show" : "hide")" disabled />
+                        <ValidationMessage For="@(() => FormData!.UserId)" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="mb-3">
+                        <label class="form-label">Amount Limit Code<span class="text-danger">*</span></label>
+                        <select @bind="FormData.AmountLimitId" class="form-control @SaveSubmit" disabled="@IsDisabled">
+                            <option value="">-- Select an option --</option>
+                            @if (DDlAmountLimitId != null)
+                                @foreach (SelectListItem x in DDlAmountLimitId)
+                                {
+                                    <option value="@x.Value">@x.Text</option>
+                                }
+                        </select>
+                        <textarea id="w3review" rows="4" cols="50" class="form-control @(BIsDisplay ? "show" : "hide")" disabled>@FormData.AmountLimitDescMore</textarea>
+                        <ValidationMessage For="@(() => FormData!.AmountLimitId)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3 @FooterCol">
+                <button type="button" class="btn btn-secondary btn btn-secondary w-100" data-dismiss="modal" @onclick="() => uiModal.CloseModal()">Close</button>
+            </div>
+            <div class="col-sm-3 @SaveSubmit">
+                <button type="submit" class="btn btn-primary btn btn-secondary w-100">Save</button>
+            </div>
+        </div>
+    </EditForm>
+</UIModal>
+@inject IUserAmountLimitServices UserAmountLimitService
+@code {
+    [Parameter]
+    public CIVSUI.Pages.UserAmountLimit.UserAmountLimit ParentPage { get; set; }
+    private UIModal uiModal;
+    public UserAmountLimitModel FormData = new();
+    public List<SelectListItem> DDlUserType;
+    public List<SelectListItem> DDlUserId;
+    public List<SelectListItem> DDlAmountLimitId;
+    private ReturnGenericStatus OutputData = new();
+    private bool IsDisabled;
+    private bool IsUserAmountLimitCodeDisabled;
+    private string FooterCol = "offset-sm-9";
+    private string SaveSubmit = "show";
+    private bool BIsEdit = false;
+    private bool BIsDisplay = false;
+
+    public async Task CreateNew()
+    {
+        FormData = new();
+        Clear();
+        await GetUserTypeList();
+        await GetAllowedAction();
+        uiModal.ShowModal();
+    }
+    public async Task PopulateForm(UserAmountLimitModel x, bool IsEdit)
+    {
+        Clear();
+        BIsEdit = IsEdit;
+        if (IsEdit)
+        {
+            IsUserAmountLimitCodeDisabled = true;
+        }
+        else
+        {
+            SaveSubmit = "hide";
+            FooterCol = "offset-sm-9";
+            IsUserAmountLimitCodeDisabled = true;
+            IsDisabled = true;
+        }
+        //await GetUserList();
+        await GetAllowedAction();
+        FormData = x;
+        BIsDisplay = !IsEdit;
+        uiModal.ShowModal();
+    }
+    public async Task Submit()
+    {
+        OutputData = await ParentPage.SaveUserAmountLimit();
+        if (OutputData.StatusCode == "00")
+            uiModal.CloseModal();
+    }
+    public void Clear()
+    {
+        BIsEdit = false;
+        BIsDisplay = false;
+        FooterCol = "offset-sm-6"; 
+        SaveSubmit = "show";
+        IsUserAmountLimitCodeDisabled = true;
+        IsDisabled = false;
+    }
+    private async Task SelectUserType(ChangeEventArgs e)
+    {
+        await GetUserList(e.Value.ToString());
+    }
+    protected async Task GetUserTypeList()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDropdown r = await UserAmountLimitService.GetUserTypeList();
+        DDlUserType = r.Data;
+    }
+    protected async Task GetUserList(string UserType)
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDropdown r = await UserAmountLimitService.GetUserList(UserType);
+        DDlUserId = r.Data;
+        if(DDlUserId.Count == 0)
+        {
+            IsUserAmountLimitCodeDisabled = true;
+        }
+        else
+        {
+            IsUserAmountLimitCodeDisabled = false;
+        }
+    }
+    protected async Task GetAllowedAction()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDropdown r = await UserAmountLimitService.GetAmountLimitList();
+        DDlAmountLimitId = r.Data;
+    }
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+}

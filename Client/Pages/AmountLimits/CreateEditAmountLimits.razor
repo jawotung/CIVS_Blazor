@@ -1,0 +1,135 @@
+﻿@using Application.Models
+@using WebAPI
+@using NetcodeHub.Packages.Components.Validations.OnInput
+
+<UIModal Title="AmountLimits" ModalSize="modal-lg" @ref="uiModal">
+    <EditForm Model="FormData" OnValidSubmit="Submit">
+        <DataAnnotationsValidator />
+        <div class="form">
+            <input type="hidden" id="id" @bind="FormData.Id" />
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Amount Limits Code<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.AmountLimitsCode" Label="AmountLimitsCode" Type="text" class="form-control" disabled="@IsAmountLimitsCodeDisabled" />
+                        <ValidationMessage For="@(() => FormData!.AmountLimitsCode)" />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Amount Limits Desc<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.AmountLimitsDesc" Label="AmountLimitsDesc" Type="text" class="form-control" disabled="@IsDisabled" />
+                        <ValidationMessage For="@(() => FormData!.AmountLimitsDesc)" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Max Amount Limit</label>
+                        <DoubleInput @bind-Value="@FormData.MaxAmountLimit" IsDisabled="@IsDisabled" />
+                        <ValidationMessage For="@(() => FormData!.MaxAmountLimit)" />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Allowed Action</label>
+                        @if (DDlAllowedAction != null)
+                            foreach (SelectListItem x in DDlAllowedAction)
+                            {
+                                <div class="form-check">
+                                    <InputCheckbox class="form-check-input" @bind-Value="x.IsChecked" name="SelectedActions" disabled="@IsDisabled" />
+                                    <label class="form-check-label" for="@x.Value">
+                                        @x.Text
+                                    </label>
+                                </div>
+                            }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2 @FooterCol">
+                <button type="button" class="btn btn-secondary btn btn-secondary w-100" data-dismiss="modal" @onclick="() => uiModal.CloseModal()">Close</button>
+            </div>
+            <div class="col-sm-2 @SaveSubmit">
+                <button type="submit" class="btn btn-primary btn btn-secondary w-100">Save</button>
+            </div>
+        </div>
+    </EditForm>
+</UIModal>
+@inject IAmountLimitsServices AmountLimitsService
+@code {
+    [Parameter]
+    public CIVSUI.Pages.AmountLimits.AmountLimits ParentPage { get; set; }
+    private UIModal uiModal;
+    public AmountLimitsModel FormData = new();
+    public List<SelectListItem> DDlAllowedAction;
+    private ReturnGenericStatus OutputData = new();
+    private bool IsDisabled;
+    private bool IsAmountLimitsCodeDisabled;
+    private string FooterCol = "offset-sm-8";
+    private string SaveSubmit = "show";
+    private string MaxAmountLimitString
+    {
+        get => FormData.MaxAmountLimit.ToString();
+        set
+        {
+            if (double.TryParse(value, out double result))
+            {
+                FormData.MaxAmountLimit = result;
+            }
+        }
+    }
+
+    protected async Task GetAllowedAction()
+    {
+        ReturnGenericDropdown r = await AmountLimitsService.GetAllowedAction();
+        DDlAllowedAction = r.Data;
+    }
+    public async Task CreateNew()
+    {
+        FormData = new();
+        await GetAllowedAction();
+        Clear();
+        uiModal.ShowModal();
+    }
+    public async Task PopulateForm(AmountLimitsModel x, bool IsEdit)
+    {
+        await GetAllowedAction();
+        Clear();
+        if (IsEdit)
+        {
+            IsAmountLimitsCodeDisabled = true;
+        }
+        else
+        {
+            SaveSubmit = "hide";
+            FooterCol = "offset-sm-10";
+            IsAmountLimitsCodeDisabled = true;
+            IsDisabled = true;
+        }
+        x.AllowedAction = "";
+        foreach (string item in x.SelectedActions)
+        {
+            var data = DDlAllowedAction.FirstOrDefault(a => a.Text.Trim() == item.Trim());
+            if (data != null)
+                data.IsChecked = true;
+        }
+        FormData = x;
+        uiModal.ShowModal();
+    }
+    public async Task Submit()
+    {
+        OutputData = await ParentPage.SaveAmountLimits();
+        if (OutputData.StatusCode == "00")
+            uiModal.CloseModal();
+    }
+    public void Clear()
+    {
+        FooterCol = "offset-sm-8"; 
+        SaveSubmit = "show";
+        IsAmountLimitsCodeDisabled = false;
+        IsDisabled = false;
+    }
+}

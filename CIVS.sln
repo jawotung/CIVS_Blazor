@@ -1,0 +1,70 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34622.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "Server\WebAPI.csproj", "{33A19687-1373-444A-8BE2-D111B78FD980}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CIVSUI", "Client\CIVSUI.csproj", "{571A751C-9618-4D33-9088-AFA3308A827B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "Application\Application.csproj", "{F2E93D08-71FE-4AA2-801D-C36F2EFAD263}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{BDAFF0F2-6DC7-4EF6-A144-D72FD76A6AAC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{BB431512-C014-467E-BA51-F993BABA361B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{33A19687-1373-444A-8BE2-D111B78FD980}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33A19687-1373-444A-8BE2-D111B78FD980}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33A19687-1373-444A-8BE2-D111B78FD980}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33A19687-1373-444A-8BE2-D111B78FD980}.Release|Any CPU.Build.0 = Release|Any CPU
+		{571A751C-9618-4D33-9088-AFA3308A827B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{571A751C-9618-4D33-9088-AFA3308A827B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{571A751C-9618-4D33-9088-AFA3308A827B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{571A751C-9618-4D33-9088-AFA3308A827B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2E93D08-71FE-4AA2-801D-C36F2EFAD263}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2E93D08-71FE-4AA2-801D-C36F2EFAD263}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2E93D08-71FE-4AA2-801D-C36F2EFAD263}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2E93D08-71FE-4AA2-801D-C36F2EFAD263}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDAFF0F2-6DC7-4EF6-A144-D72FD76A6AAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDAFF0F2-6DC7-4EF6-A144-D72FD76A6AAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDAFF0F2-6DC7-4EF6-A144-D72FD76A6AAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDAFF0F2-6DC7-4EF6-A144-D72FD76A6AAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB431512-C014-467E-BA51-F993BABA361B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB431512-C014-467E-BA51-F993BABA361B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB431512-C014-467E-BA51-F993BABA361B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB431512-C014-467E-BA51-F993BABA361B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F8772DC9-A577-4B12-9E40-14AC98EEFC84}
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 6
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://tfs:8080/amdev/amdev
+		SccProjectUniqueName0 = Application\\Application.csproj
+		SccProjectName0 = Application
+		SccLocalPath0 = Application
+		SccProjectUniqueName1 = Domain\\Domain.csproj
+		SccProjectName1 = Domain
+		SccLocalPath1 = Domain
+		SccProjectUniqueName2 = Infrastructure\\Infrastructure.csproj
+		SccProjectName2 = Infrastructure
+		SccLocalPath2 = Infrastructure
+		SccLocalPath3 = .
+		SccProjectUniqueName4 = Client\\CIVSUI.csproj
+		SccProjectName4 = Client
+		SccLocalPath4 = Client
+		SccProjectUniqueName5 = Server\\WebAPI.csproj
+		SccProjectName5 = Server
+		SccLocalPath5 = Server
+	EndGlobalSection
+EndGlobal

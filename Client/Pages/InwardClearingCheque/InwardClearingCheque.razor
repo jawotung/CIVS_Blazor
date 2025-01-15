@@ -1,0 +1,751 @@
+﻿@page "/inward-clearing-cheque"
+@page "/inward-clearing-cheque/{Menu}"
+@page "/inward-clearing-cheque/{Menu}/{Key}"
+@using Application.Models
+@using Application.Service
+@using Blazored.LocalStorage
+@using Domain.Entities
+@using WebAPI
+@using Microsoft.JSInterop
+@using System.IO;
+@using Microsoft.AspNetCore.Http;
+@using System.Net.Http.Headers
+@inject HttpClient Http
+@inject ILocalStorageService localStorageService
+
+@{
+    string Header = string.Format("{0} Inward Clearing Cheque", !string.IsNullOrEmpty(Key) ? (string.Format("{0}", (Key == "RB" ? "Branch Approval" : "Next Level Approver"))) : "Verify");
+
+    <PageTitle>@Header</PageTitle>
+    <h3 class="Page-Header">@Header</h3>
+}
+
+<EditForm Model="FormData" OnValidSubmit="() => Search(1)">
+   <div class="form">
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="mb-3 row">
+                    <label for="staticEmail" class="col-sm-4 col-form-label" style="font-weight: bold;padding-right: 0px;padding-left: 0px;">Date From</label>
+                    <div class="col-sm-8" style="padding-right: 0px;padding-left: 0px;">
+                        <input type="date" class="form-control" @bind="FormData.DateFromFilter"/>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="mb-3 row">
+                    <label for="staticEmail" class="col-sm-4 col-form-label" style="font-weight: bold;padding-right: 0px;">Date To</label>
+                    <div class="col-sm-8" style="padding-right: 0px;padding-left: 0px;">
+                        <input type="date" class="form-control" @bind="FormData.DateToFilter" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="mb-3 row">
+                    <label for="staticEmail" class="col-sm-4 col-form-label" style="font-weight: bold;padding-right: 0px;">Account Number</label>
+                    <div class="col-sm-8" style="padding-right: 0px;padding-left: 0px;">
+                        <input type="text" @bind="FormData.AccountNumberFilter" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div> 
+        <div class="row">
+            <div class="col-sm-5">
+                <div class="mb-3 row">
+                    <label for="staticEmail" class="col-sm-3 col-form-label" style="font-weight: bold;padding-right: 0px;padding-left: 0px;">Check Status</label>
+                    <div class="col-sm-5" style="padding-right: 0px;padding-left: 0px;">
+                        <input type="text" @bind="FormData.CheckImageFilter" class="form-control" />
+                    </div>
+                    <div class="col-sm-4">
+                        <select class="form-control" @onchange="(e) => OnChangeCheckImageFilter(e)">
+                            <option value="">-- Select --</option>
+                            @if (DDlCheckImageList != null)
+                                @foreach (SelectListItem x in DDlCheckImageList)
+                                {
+                                    <option value="@x.Value">@x.Text</option>
+                                }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-7">
+                <div class="mb-3 row">
+                    <label for="staticEmail" class="col-sm-2 col-form-label" style="font-weight: bold;padding-right: 0px;padding-left: 0px;">BRSTN</label>
+                    <div class="col-sm-5" style="padding-right: 0px;">
+                        <input type="text" @bind="FormData.BSRTNFilter" class="form-control" />
+                    </div>
+                    <div class="col-sm-5">
+                        <select class="form-control" @onchange="(e) => OnChangeBSRTNFilter(e)">
+                            <option value="">-- Select --</option>
+                            @if (DDlBRSTNList != null)
+                                @foreach (SelectListItem x in DDlBRSTNList)
+                                {
+                                    <option value="@x.Value">@x.Text</option>
+                                }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>     
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="mb-3 row">
+                    <label for="staticEmail" class="col-sm-4 col-form-label" style="font-weight: bold;padding-right: 0px;padding-left: 0px;">Amount From</label>
+                    <div class="col-sm-8">
+                        <input type="number" class="form-control" @bind="FormData.AmountFromFilter" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="mb-3 row">
+                    <label for="staticEmail" class="col-sm-4 col-form-label" style="font-weight: bold;padding-right: 0px;padding-left: 0px;">Amount To</label>
+                    <div class="col-sm-8">
+                        <input type="number" class="form-control" @bind="FormData.AmountToFilter"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+    <div class="row">
+        <div class="col-2 offset-10">
+            <button class="btn btn-outline-success w-100 btn-sm" type="submit"><i class="fa fa-search"></i> Search</button>
+        </div>
+    </div>
+</EditForm>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover table-bordered">
+        <thead>
+            <tr class="table-dark">
+                <th>Check Number</th>
+                <th>Account Number</th>
+                <th>BRSTN</th>
+                <th>Check Amount</th>
+                <th>Effectivity Date</th>
+                <th>Check Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (List != null)
+                foreach (InwardClearingChequeDetailsModel x in List)
+                {
+                    <tr>
+                        <td>@x.CheckNumber</td>
+                        <td>@x.AccountNumber</td>
+                        <td>@x.Brstn</td>
+                        <td class="text-right">@x.CheckAmount</td>
+                        <td>@x.EffectivityDate</td>
+                        <td>
+                            @if (x.CheckStatus == "ReAssign")
+                            {
+                                @x.ReasonDesc
+                            }
+                            else
+                            {
+                                @x.CheckStatusDisplay
+                            }
+                        </td>
+                        <td>
+                            @if ((x.CheckStatus.Equals("Accept") || x.CheckStatus.Equals("Reject"))
+                           || ((Key == null) && (x.CheckStatus == "ReAssign" || x.CheckStatus == "ReferToOfficer"))
+                           )
+                            {
+                                <button type="button" class="btn btn-info" @onclick="() => Display(x.Id)"><i class="fa fa-eye"></i></button>
+                            }
+
+                            @if ((x.CheckStatus == "Open") || ((Key != null) && (x.CheckStatus == "ReAssign" || x.CheckStatus == "ReferToOfficer")))
+                            {
+                                <button type="button" class="btn btn-info" @onclick="() => Select(x)"><i class="fa fa-edit"></i></button>
+                            }
+                        </td>
+                    </tr>
+                }
+        </tbody>
+    </table>
+</div>
+<UIPagination CurrentPage="page"
+                TotalPages="Paginated.TotalPages"
+                HasPreviousPage="Paginated.HasPreviousPage"
+                HasNextPage="Paginated.HasNextPage"
+                CountData="Paginated.CountData"
+                OnPageChanged="Search" />
+
+<UIModal Title="BankCom Check Image Verification System" ModalSize="modal-lg" @ref="uiDetailModal">
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="fw-bold">Cheque Image File Content</div>
+        </div>
+        <div class="col-lg-9">
+            <div class="">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link @liTabImageFrontCSS" @onclick="() => TabImageClick(true)" style="padding: 10px;">Front</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @liTabImageBackCSS" @onclick="() => TabImageClick(false)" style="padding: 10px;">Back</a>
+                    </li>
+                </ul>
+                <div class="row">
+                    <div class="col-sm-12 @TabImageFrontCSS">
+                        @if (CheckDetail.ChequeImageFileContentF != "data: image/jpeg; base64 , noimages.png")
+                        {
+                            <img id="CheckNoImageF" src="@CheckDetail.ChequeImageFileContentF" class="img-fluid" />
+                        }
+                        else
+                        {
+                            <img src="img/noimages.png" class="img-fluid" />
+                        }
+                    </div>
+                    <div class="col-sm-12 @TabImageBackCSS">
+                        @if (CheckDetail.ChequeImageFileContentR != "data: image/jpeg; base64 , noimages.png")
+                        {
+                            <img id="CheckNoImageF" src="@CheckDetail.ChequeImageFileContentR" class="img-fluid" @onclick="() => TabImageClick(false)" />
+                        }
+                        else
+                        {
+                            <img src="img/noimages.png" class="img-fluid" />
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3"><div class="fw-bold">Account Number</div></div>
+        <div class="col-lg-9">
+            <div class="">@CheckDetail.AccountNumber</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3"><div class="fw-bold">Check Number</div></div>
+        <div class="col-lg-9">
+            <div class="">@CheckDetail.CheckNumber</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3"><div class="fw-bold">Effectivity Date</div></div>
+        <div class="col-lg-9">
+            <div class="">@CheckDetail.EffectivityDate</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3"><div class="fw-bold">Check Status Final</div></div>
+        <div class="col-lg-9">
+            <div class="fw-bold">@CheckDetail.CheckStatus</div>
+        </div>
+    </div>
+     <div class="row">
+        <div class="col-lg-3"><div class="fw-bold">Reason Final</div></div>
+        <div class="col-lg-9">
+            <div class="">@CheckDetail.Reason</div>
+        </div>
+    </div>
+     <div class="row">
+        <div class="col-lg-3"><div class="fw-bold">VerifiedBy</div></div>
+        <div class="col-lg-9">
+            <div class="">@CheckDetail.VerifiedBy</div>
+        </div>
+    </div>
+     <div class="row">
+        <div class="col-lg-3"><div class="fw-bold">VerifiedDateTime</div></div>
+        <div class="col-lg-9">
+            <div class="">@CheckDetail.VerifiedDateTime</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3"><div class="fw-bold">ApprovedBy</div></div>
+        <div class="col-lg-9"><div class="">@CheckDetail.ApprovedBy</div></div>
+    </div>
+     <div class="row">
+        <div class="col-lg-3"><div class="fw-bold">ApprovedDateTime</div></div>
+        <div class="col-lg-9"><div class="">@CheckDetail.ApprovedDateTime</div></div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3"><div class="fw-bold">History</div></div>
+        <div class="col-lg-9">
+            <div class=""></div>
+        </div>
+    </div>
+</UIModal>
+
+<UIModal Title="BankCom Check Image Verification System" ModalSize="modal-xl" @ref="uiSelectModal">
+    <div class="row">
+        <div class="col-lg-7">
+            <ul class="nav nav-tabs">
+                <li class="nav-item p-2">
+                    <a class="nav-link @liTabImageFrontCSS" @onclick="() => TabImageClick(true)" style="padding: 10px;">Front</a>
+                </li>
+                <li class="nav-item p-2">
+                    <a class="nav-link @liTabImageBackCSS" @onclick="() => TabImageClick(false)" style="padding: 10px;">Back</a>
+                </li>
+                <div id="AccountName" class="bg-light text-dark" style="margin-left: 5%; padding-left: 10px; padding-right: 10px;">
+                    @SelectImageDetail.AccountName
+                </div>
+            </ul>
+            <div class="row">
+                <div class="col-sm-12 @TabImageFrontCSS">
+                    @if (SelectImageDetail.FileContentR != "data: image/jpeg; base64 , noimages.png")
+                    {
+                        <img id="CheckNoImageF" src="@SelectImageDetail.FileContentF" class="img-fluid" />
+                    }
+                    else
+                    {
+                        <img src="img/noimages.png" class="img-fluid" />
+                    }
+                </div>
+                <div class="col-sm-12 @TabImageBackCSS">
+                    @if (SelectImageDetail.FileContentR != "data: image/jpeg; base64 , noimages.png")
+                    {
+                        <img id="CheckNoImageF" src="@SelectImageDetail.FileContentR" class="img-fluid" @onclick="() => TabImageClick(false)" />
+                    }
+                    else
+                    {
+                        <img src="img/noimages.png" class="img-fluid" />
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="pt-5">
+                <table cellpadding="3" class="table">
+                    <tr>
+                        <td class="fw-bold">Filename</td>
+                        <td><div id="ImageFileName">@SelectImageDetail.FileName</div></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Amount</td>
+                        <td><div id="ImageAmount">@SelectImageDetail.Amount</div></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Account Status</td>
+                        <td><div>@SelectImageDetail.CheckStatus</div></td>
+                    </tr>
+                </table>
+            </div>
+            <div id="ActionDiv" style="font-size: 12px;">
+                <EditForm Model="FormDataCheckDetail" OnValidSubmit="Submit">
+                    <div class="row">
+                        <dt class="col-sm-3">Action</dt>
+                        <dd class="col-sm-9">
+                            <select value="@FormDataCheckDetail.VerifyAction" class="form-control" @onchange="(e) => OnChangeAction(e)">
+                                @if (UserAllowedAction != null)
+                                {
+                                    @foreach (SelectListItem x in UserAllowedAction)
+                                    {
+                                        <option value="@x.Value">@x.Text</option>
+                                    }
+                                }
+                            </select>
+                        </dd>
+                    </div>
+                    <div id="RejectDiv" class="row @(selectedAction == "Reject" ? "": "d-none")">
+                        <dt class="col-sm-3">Reject Reason</dt>
+                        <dd class="col-sm-9">
+                            <select class="form-control" @bind="FormDataCheckDetail.SelectedReasonCode">
+                                <option value="">-- Select--</option>
+                                @if (DDlReasonList != null)
+                                {
+                                    @foreach (SelectListItem x in DDlReasonList)
+                                    {
+                                        <option value="@x.Value">@x.Text</option>
+                                    }
+                                }
+                            </select>
+                        </dd>
+                    </div>
+                    <div id="ReassignReasonDiv" class="row @(selectedAction == "ReAssign" ? "": "d-none")">
+                        <dt class="col-sm-3">Reason for Re-Assign to Branch</dt>
+                        <dd class="col-sm-9">
+                            <select class="form-control" @bind="FormDataCheckDetail.ReassignReason">
+                                <option value="">-- Select--</option>
+                                @if (DDlReasonList != null)
+                                {
+                                    @foreach (SelectListItem x in DDlReasonList)
+                                    {
+                                        <option value="@x.Value">@x.Text</option>
+                                    }
+                                }
+                            </select>
+                        </dd>
+                    </div>
+                    <div id="OfficerDiv" class="row @(selectedAction == "ReferToOfficer" ? "": "d-none")">
+                        <dt class="col-sm-3">Next Level Appover</dt>
+                        <dd class="col-sm-9">
+                            <select class="form-control" @bind="FormDataCheckDetail.SelectedOfficerCode">
+                                <option value="">-- Select--</option>
+                                @if (DDlOfficerList != null)
+                                {
+                                    @foreach (SelectListItem x in DDlOfficerList)
+                                    {
+                                        <option value="@x.Value">@x.Text</option>
+                                    }
+                                }
+                            </select>
+                        </dd>
+                    </div>
+                    <div>
+                        <input type="submit" id="Done" value="Done" class="btn btn-primary" />
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+        <div class="row">
+            <div id="AccountSignature">
+
+                <div id="carousel-sign" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        @if(SignatureData != null)
+                        {
+                            var info = SignatureData.Info;
+                            var groups = SignatureData.Groups;
+                            var rules = SignatureData.Rules;
+                            var images = SignatureData.Images;
+                            @if (images != null)
+                                @for (int i = 0; i < images.Count; i++)
+                            {
+                                var x = images[i];
+                                var isActive = ""; 
+                                if (images[i].ImageNo == 1 || i == 0)
+                                {
+                                    isActive = "active";
+                                }
+                                <div class="carousel-item @isActive">
+                                    <div class="row">
+                                        <div class="col-lg-7">
+                                            <div class="text-white bg-dark" align="center">
+                                                <img class="img-fluid" src="@images[i].Signature" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-hover table-bordered">
+                                                    <tr class="bg-dark text-white">
+                                                        <th>RuleNo</th>
+                                                        <th>Amount</th>
+                                                        <th>Reason</th>
+                                                    </tr>
+                                                    @if (rules != null)
+                                                        @foreach (SvsRule rule in rules)
+                                                        {
+                                                            <tr>
+                                                                <td>@rule.RuleNo</td>
+                                                                <td>@rule.Amount</td>
+                                                                <td>@rule.Reason</td>
+                                                            </tr>
+                                                        }
+                                                </table>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <tr>
+                                                        <td>Account Number</td>
+                                                        <td>@images[i].AccNo</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Number of Image</td>
+                                                        <td>@(info.Count > 0 ? info[0].NumImage : "")</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>GroupName</td>
+                                                        <td>@(groups.Count > 0 ? groups[0].GroupName : "")</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>ImageNo</td>
+                                                        <td>@images[i].ImageNo</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>EffectiveDate</td>
+                                                        <td>@images[i].EffectiveDate</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>ExpiredDate</td>
+                                                        <td>@images[i].ExpiredDate</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Name</td>
+                                                        <td>@images[i].Name</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Title</td>
+                                                        <td>@images[i].Title</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>IDCard</td>
+                                                        <td>@images[i].IDCard</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Phone</td>
+                                                        <td>@images[i].Phone</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-sign" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-sign" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    
+    </div>
+</UIModal>
+
+<Toast @ref="Msg"></Toast>
+<LoadingModal @ref="MdlLoading" IsLoading="isLoading"></LoadingModal>
+
+@inject IInwardClearingChequeServices InwardClearingChequeServices
+@inject IUserServices UserServices
+@code {
+    [Parameter]
+    public string Key { get; set; }
+    [Parameter]
+    public string Menu { get; set; }
+
+    private int page = 1;
+    private Toast Msg { get; set; }
+    private ReturnGenericStatus OutputData = new();
+    private List<SelectListItem> DDlCheckImageList = new();
+    private List<SelectListItem> DDlBRSTNList = new();
+    private List<SelectListItem> DDlReasonList = new();
+    private List<SelectListItem> DDlOfficerList = new();
+
+    private ReturnViewSignatures SignatureData = new();
+
+
+    private PaginatedOutputServices<InwardClearingChequeDetailsModel> Paginated = new();
+    private List<InwardClearingChequeDetailsModel> List;
+    private UIModal uiDetailModal;
+    private UIModal uiSelectModal;
+
+    private LoadingModal MdlLoading;
+    private bool isLoading = true;
+    ParamInwardClearingChequeGetList FormData = new();
+    ParamSaveChequeDetails FormDataCheckDetail = new();
+    CheckDetailModel CheckDetail = new();
+    ReturnCheckImageDetailTransaction SelectImageDetail = new();
+    public List<SelectListItem> UserAllowedAction;
+
+    private bool TabImageActive = true;
+    private string? liTabImageFrontCSS => TabImageActive ? "active" : "";
+    private string? liTabImageBackCSS => !TabImageActive ? "active" : "";
+
+    private string? TabImageFrontCSS => TabImageActive ? "show" : "hide";
+    private string? TabImageBackCSS => !TabImageActive ? "show" : "hide";
+
+    private string selectedAction;
+    private string selectedAccountNumber = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        FormData.DateFromFilter = DateTime.Today;
+        FormData.DateToFilter = DateTime.Today;
+        isLoading = true;
+        await Initialize();
+        isLoading = false;
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        Paginated = new();
+        List = new(); 
+        FormData = new();
+        FormDataCheckDetail = new();
+        CheckDetail = new();
+        SelectImageDetail = new();
+        UserAllowedAction = new();
+        FormData.DateFromFilter = DateTime.Today;
+        FormData.DateToFilter = DateTime.Today;
+        await Initialize();
+        base.OnParametersSet();
+    }
+
+    protected async Task Initialize()
+    {
+        await GetBranchOfAssignmentList();
+        await GetStatusList();
+        await GetReasonList();
+        await GetOfficerList();
+        StateHasChanged();
+    }
+
+
+    protected async Task Search(int page)
+    {
+        await GetList(page);
+    }
+
+    protected async Task GetList(int Page)
+    {
+        isLoading = true;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await InwardClearingChequeServices.GetICCList(Key, Page, FormData);
+        if(result.StatusCode == "00")
+        {
+            page = Page;
+            Paginated = result.Data;
+            List = Paginated.Data;
+            StateHasChanged();
+        }
+        else
+        {
+            OutputData.StatusCode = result.StatusCode;
+            OutputData.StatusMessage = result.StatusMessage;
+            Msg.ShowMsg(OutputData);
+        }
+        isLoading = false;
+    }
+
+    protected async Task GetStatusList()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDropdown r = await InwardClearingChequeServices.GetStatusList();
+        DDlCheckImageList = r.Data;
+    }
+
+    protected async Task GetBranchOfAssignmentList()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDropdown r = await UserServices.GetBranchOfAssignmentList();
+        DDlBRSTNList = r.Data;
+    }
+
+    protected async Task GetReasonList()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await InwardClearingChequeServices.GetReasonList();
+        DDlReasonList = result.Data;
+    }
+
+    protected async Task GetOfficerList()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await InwardClearingChequeServices.GetOfficerList();
+        DDlOfficerList = result.Data;
+    }
+
+    protected async Task Select(InwardClearingChequeDetailsModel obj)
+    {
+        isLoading = true;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await InwardClearingChequeServices.GetCheckImageDetails(obj.ChequeImageLinkedKey);
+        if(result.StatusCode == "00")
+        {
+            selectedAccountNumber = obj.AccountNumber;
+            var signature = await InwardClearingChequeServices.GetViewSignatures(obj.AccountNumber);
+            if(signature.StatusCode == "00")
+            {
+                SignatureData = signature.Data;
+                var userAllowAction = await InwardClearingChequeServices.GetUserAllowedAccess(Key, result.Data.Amount);
+                UserAllowedAction = userAllowAction.Data;
+                FormDataCheckDetail.VerifyAction = userAllowAction.Data.Count > 0 ? userAllowAction.Data[0].Value: "";
+                FormDataCheckDetail.SelectedCheck = obj.ChequeImageLinkedKey;
+            }
+            else
+            {
+                OutputData.StatusCode = result.StatusCode;
+                OutputData.StatusMessage = result.StatusMessage;
+                Msg.ShowMsg(OutputData);
+            }
+            SelectImageDetail = result.Data;
+            uiSelectModal.ShowModal();
+        }
+        else
+        {
+            OutputData.StatusCode = result.StatusCode;
+            OutputData.StatusMessage = result.StatusMessage;
+            Msg.ShowMsg(OutputData);
+        }
+        isLoading = false;
+    }
+    protected async Task Display(int Id)
+    {
+        isLoading = true;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await InwardClearingChequeServices.GetICCDetails(Id);
+        if(result.StatusCode == "00")
+        {
+            uiDetailModal.ShowModal();
+            CheckDetail = result.Data;
+        }
+        else
+        {
+            OutputData.StatusCode = result.StatusCode;
+            OutputData.StatusMessage = result.StatusMessage;
+            Msg.ShowMsg(OutputData);
+        }
+        isLoading = false;
+    }
+
+    private void TabImageClick(bool x)
+    {
+        TabImageActive = x;
+    }
+
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+
+    public async Task Submit()
+    {
+        isLoading = true;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await InwardClearingChequeServices.SubmitCheck(FormDataCheckDetail);
+        if (result.StatusCode == "00")
+        {
+            await Search(page);
+            isLoading = false;
+            uiSelectModal.CloseModal();
+            await Task.Delay(500);
+            var obj = new InwardClearingChequeDetailsModel();
+            obj.ChequeImageLinkedKey = FormDataCheckDetail.SelectedCheck;
+            obj.AccountNumber = selectedAccountNumber;
+            await Select(obj);
+
+            // FormDataCheckDetail.SelectedCheck = "";
+            // FormDataCheckDetail.VerifyAction = UserAllowedAction.Count > 0 ? UserAllowedAction[0].Value : "";
+        }
+        else
+        {
+            isLoading = false;
+            OutputData.StatusCode = result.StatusCode;
+            OutputData.StatusMessage = result.StatusMessage;
+            Msg.ShowMsg(OutputData);
+        }
+        
+    }
+
+    protected void OnChangeAction(ChangeEventArgs e)
+    {
+        selectedAction = e.Value.ToString();
+        FormDataCheckDetail.VerifyAction = e.Value.ToString();
+    }
+
+    protected void OnChangeCheckImageFilter(ChangeEventArgs e)
+    {
+        FormData.CheckImageFilter = e.Value.ToString();
+    }
+
+    protected void OnChangeBSRTNFilter(ChangeEventArgs e)
+    {
+        FormData.BSRTNFilter = e.Value.ToString();
+    }
+}

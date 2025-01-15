@@ -1,0 +1,186 @@
+﻿@page "/branch-buddy-bcp/{Menu}"
+@using Application.Models
+@using Application.Service
+@using WebAPI
+@using Microsoft.JSInterop
+
+<PageTitle>Branch</PageTitle>
+<h3 class="Page-Header">Branch Buddy BCP List</h3>
+<div>
+    <div class="row">
+        <div class="col">
+            <form class="d-flex">
+                <input class="form-control me-2" type="text" placeholder="Branch" aria-label="Branch" @bind-value="SBranchDesc" @bind-value:event="oninput" />
+                <button class="btn btn-outline-success" type="button" @onclick="() => Search()">Search</button>
+            </form>
+        </div>
+        <div class="col"></div>
+    </div>
+    <div class="row">
+        <div class="col-2">
+            <button class="btn btn-success w-100 btn-sm" type="button" @onclick="() => Modal.CreateNew()"><i class="fa fa-plus"></i> Add</button>
+        </div>
+        <div class="col-2">
+            <button class="btn btn-warning w-100 btn-sm" type="button" @onclick="() => PrintBranchModelAux()"><i class="fa fa-print"></i> Print</button>
+        </div>
+    </div>
+    <div class="table-responsive-vh" >
+        <table class="table table-striped table-hover table-bordered ">
+            <thead>
+                <tr class="table-dark">
+                    <th style="width: 10%;">Branch Code</th>
+                    <th style="width: 15%;">Branch Buddy</th>
+                    <th style="width: 30%;">BCP Mode</th>
+                    <th style="width: 10%;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (BranchModelAuxList != null)
+                {
+                    foreach (BranchModelAux x in BranchModelAuxList)
+                    {
+                        <tr>
+                            <td style="width: 35%;">@x.BranchCode</td>
+                            <td style="width: 35%;">@x.BranchBuddyCode</td>
+                            <td style="width: 15%;"><input type="checkbox" checked="@x.BranchBcp" disabled /></td>
+                            <td style="width: 15%;">
+                                <button type="button" class="btn btn-sm btn-info" @onclick="() => Modal.PopulateForm(x,true)"><i class="fa fa-edit"></i></button>
+                                <button type="button" class="btn btn-sm btn-danger" @onclick="() => DeleteConfirmation(x.Id)"><i class="fa fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    }
+                }
+                @if (BranchModelAuxList.Count == 0)
+                {
+                    <tr>
+                        <td colspan="4" class="text-center">No Data Available</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <UIPagination CurrentPage="page"
+                  TotalPages="Paginated.TotalPages"
+                  HasPreviousPage="Paginated.HasPreviousPage"
+                  HasNextPage="Paginated.HasNextPage"
+                  CountData="Paginated.CountData"
+                  OnPageChanged="GetBranchModelAuxList" />
+</div>
+
+<CIVSUI.Pages.BranchBuddy.CreateEditBranchBuddy @ref="Modal" ParentPage="@this"></CIVSUI.Pages.BranchBuddy.CreateEditBranchBuddy>
+<ConfirmationToast @ref="Confirmation"
+                   ConfimationMsg="@ConfimationMsg"
+                   OnConfirm="DeleteBranch"
+                   IsVisible="@IsConfirmationModalVisible">
+</ConfirmationToast>
+
+
+<LoadingModal @ref="MdlLoading" IsLoading="@isLoading"></LoadingModal>
+
+<Toast @ref="Msg"></Toast>
+
+@inject IBranchModelAuxServices BranchModelAuxServices
+@inject IJSRuntime JSRuntime
+@code {
+    [Parameter]
+    public string Menu { get; set; }
+    private CIVSUI.Pages.BranchBuddy.CreateEditBranchBuddy Modal { get; set; }
+    private Toast Msg { get; set; }
+    private ConfirmationToast Confirmation { get; set; }
+    private bool IsConfirmationModalVisible = false;
+    private string ConfimationMsg = string.Empty;
+    private LoadingModal MdlLoading;
+    private bool isLoading = true;
+    private PaginatedOutputServices<BranchModelAux> Paginated = new();
+    private List<BranchModelAux> BranchModelAuxList = new();
+    private ReturnGenericStatus OutputData = new();
+    private BranchModelAux data;
+    private string SBranchDesc = "";
+    private int page = 1;
+    private int ID;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Initialize(); 
+    }
+    protected async Task Initialize()
+    {
+        await GetBranchModelAuxList(page);
+        StateHasChanged();
+    }
+    protected async Task GetBranchModelAuxList(int Page)
+    {
+        isLoading = true;
+        page = Page;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        Paginated = await BranchModelAuxServices.GetBranchModelAuxList(SBranchDesc, page);
+        BranchModelAuxList = Paginated.Data;
+        isLoading = false;
+    }
+    protected async Task Search()
+    {
+        page = 1;
+        await GetBranchModelAuxList(page);
+    }
+    public async Task<ReturnGenericStatus> SaveBranchModelAux()
+    {
+        isLoading = true;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDictionary x = await BranchModelAuxServices.SaveBranchModelAux(Modal.FormData);
+        OutputData.StatusMessage = x.StatusMessage;
+        OutputData.StatusCode = x.StatusCode;
+        Msg.ShowMsg(OutputData);
+        if (OutputData.StatusCode == "00")
+            await Initialize();
+        else
+            isLoading = false;
+        return OutputData;
+    }
+    private void DeleteConfirmation(int id)
+    {
+        ConfimationMsg = "";
+        ID = id;
+        ConfimationMsg = "Are you sure you want to delete this?";
+        IsConfirmationModalVisible = true;
+    }
+    protected async Task DeleteBranch(bool IsConfirmed)
+    {
+        if (IsConfirmed)
+        {
+            isLoading = true;
+            string token = await GetAuth();
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            OutputData = await BranchModelAuxServices.DeleteBranchModelAuxes(ID);
+            Msg.ShowMsg(OutputData);
+            if (OutputData.StatusCode == "00")
+                await Initialize();
+            else
+                isLoading = false;
+        }
+        IsConfirmationModalVisible = false;
+        ID = 0;
+    }
+    protected async Task PrintBranchModelAux()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        isLoading = true;
+        ReturnGenericData<ReturnDownloadPDF> FileByte = await BranchModelAuxServices.PrintBranchModelAux(SBranchDesc);
+        isLoading = false;
+        if (FileByte.StatusCode == "00")
+        {
+            string base64Data = FileByte.Data.PdfDataBase64.Trim('"');
+            await JSRuntime.InvokeVoidAsync("downloadFile", "application/pdf", base64Data, FileByte.Data.FileName);
+        }
+        else
+        {
+            Msg.ShowMsg(new ReturnGenericStatus{ StatusCode = FileByte.StatusCode, StatusMessage = FileByte.StatusMessage });
+        }
+    }
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+}

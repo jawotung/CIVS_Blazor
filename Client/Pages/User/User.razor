@@ -1,0 +1,315 @@
+﻿@page "/system-users"
+@page "/system-users/{key}"
+@using Application.Models
+@using Application.Service
+@using WebAPI
+@using Microsoft.JSInterop
+@using Microsoft.AspNetCore.WebUtilities
+@using CIVSUI.Pages.User
+<PageTitle>User</PageTitle>
+
+<h3 class="Page-Header">
+    @if (key == "Disabled")
+    {
+    <h1>Disabled</h1>
+    }
+    else if (key == "Deactivated")
+    {
+    <h1>Deactivated</h1>
+    }
+    User List</h3>
+
+
+
+<div>
+    <div class="row">
+        <div class="col">
+            <form class="d-flex">
+                <input class="form-control me-2" type="text" placeholder="User ID" aria-label="User Code" @bind-value="SUserID" @onkeypress:preventDefault />
+                <button class="btn btn-outline-success" type="button" @onclick="() => Search()">Search</button>
+            </form>
+        </div>
+        <div class="col"></div>
+    </div>
+    <div class="row">
+        @if (String.IsNullOrEmpty(key))
+        {
+            <div class="col-2">
+                <button class="btn btn-success w-100 btn-sm" type="button" @onclick="() => Modal.CreateNew()"><i class="fa fa-plus"></i> Add</button>
+            </div>
+        }
+        <div class="col-2">
+            <button class="btn btn-warning w-100 btn-sm" type="button" @onclick="() => PrintUser()"><i class="fa fa-print"></i> Print</button>
+        </div>
+
+        @if (String.IsNullOrEmpty(key))
+        {
+            <div class="col-2">
+                <button class="btn btn-info w-100 btn-sm" type="button" @onclick="() => TagInactiveUser()">Tag Inactive User</button>
+            </div>
+            <div class="col-3">
+                <button class="btn btn-info w-100 btn-sm" type="button" @onclick="() => ClearAllUserSession()">Clear All Users Session</button>
+            </div>
+        }
+    </div>
+    <div class="table-responsive-vh">
+        <table class="table table-striped table-hover table-bordered ">
+            <thead>
+                <tr class="table-dark">
+                    <th>User ID <br/>EmployeeNumber</th>
+                    <th>User Name</th>
+                    <th>User Type</th>
+                    <th>Branch of Assignment</th>
+                    <th>Disabled</th>
+                    <th>Deactivated</th>
+                    <th>Last Login Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (UserList != null)
+                    foreach (UserModel x in UserList)
+                    {
+                        <tr>
+                            <td>@x.UserId<br/>(@x.EmployeeNumber)</td>
+                            <td>@x.UserDisplayName</td>
+                            <td>@x.UserTypeDesc (@x.GroupingDesc)</td>
+                            <td>@x.BranchOfAssignmentDesc</td>
+                            <td><input type="checkbox" checked="@x.Isdisabled" disabled /></td>
+                            <td><input type="checkbox" checked="@x.Isdeleted" disabled /></td>
+                            <td>@x.LastLoginDate.ToString("MM/dd/yyyy")</td>
+                            <td>
+                                @{
+                                    string disable = !(x.Isdisabled ?? false) ? "Disable" : "Enable";
+                                    string activation = !x.Isdeleted ? "Deactivate" : "Reactivate";
+                                    string btnClassDisable = !(x.Isdisabled ?? false) ? "btn-danger" : "btn-success";
+                                    string btnClassDeactivate = !x.Isdeleted ? "btn-danger" : "btn-success";
+
+                                    @if (key == "Disabled")
+                                    {
+                                        <button type="button" class="btn btn-sm @btnClassDisable" @onclick="() => AbleConfirm(x.Id,(x.Isdisabled ?? false))">@disable</button>
+                                    }
+                                    else if (key == "Deactivated")
+                                    {
+                                        <button type="button" class="btn btn-sm @btnClassDeactivate" @onclick="() => ActiveConfirm(x.Id,x.Isdeleted)">@activation</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-sm btn-success" @onclick="() => DisplayUserModal.Display(x)"><i class="fa fa-eye"></i></button>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+            </tbody>
+        </table>
+    </div>
+    <UIPagination CurrentPage="page"
+                  TotalPages="Paginated.TotalPages"
+                  HasPreviousPage="Paginated.HasPreviousPage"
+                  HasNextPage="Paginated.HasNextPage"
+                  CountData="Paginated.CountData"
+                  OnPageChanged="GetUserList" /> 
+</div>
+
+<CreateEditUser @ref="Modal" ParentPage="@this"></CreateEditUser>
+<DisplayUser @ref="DisplayUserModal" ParentPage="@this"></DisplayUser>
+<Toast @ref="Msg"></Toast>
+
+<LoadingModal @ref="MdlLoading" IsLoading="@isLoading"></LoadingModal>
+<ConfirmationToast @ref="AbleConfirmation"
+                   ConfimationMsg="@ConfimationMsgAble"
+                   OnConfirm="Able"
+                   IsVisible="@IsAbleModal">
+</ConfirmationToast>
+<ConfirmationToast @ref="ActiveConfirmation"
+                   ConfimationMsg="@ConfimationMsgActive"
+                   OnConfirm="Activate"
+                   IsVisible="@IsActiveModal">
+</ConfirmationToast>
+
+<LoadingModal @ref="MdlLoading" IsLoading="isLoading"></LoadingModal>
+
+@inject IUserServices UserService
+@inject NavigationManager nav
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@code {
+    [Parameter] 
+    public string? key { get; set; }
+    private CIVSUI.Pages.User.CreateEditUser Modal { get; set; }
+    private CIVSUI.Pages.User.DisplayUser DisplayUserModal { get; set; }
+    private Toast Msg { get; set; }
+    private LoadingModal MdlLoading;
+    private PaginatedOutputServices<UserModel> Paginated = new();
+    private List<UserModel> UserList;
+    private ReturnGenericStatus OutputData = new();
+    private UserModel data;
+    private string SUserID;
+    private int page = 1;
+    private bool isLoading = true;
+    private int ID;
+    private bool Status;
+
+    private ConfirmationToast AbleConfirmation { get; set; }
+    private bool IsAbleModal = false;
+    private string ConfimationMsgAble = string.Empty;
+
+    private ConfirmationToast ActiveConfirmation { get; set; }
+    private bool IsActiveModal = false;
+    private string ConfimationMsgActive = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Initialize();
+    }
+    protected async Task Initialize()
+    {
+        await GetUserList(page);
+        StateHasChanged();
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        SUserID = "";
+        await Initialize();
+        base.OnParametersSet();
+    }
+    protected async Task GetUserList(int Page)
+    {
+        isLoading = true;
+        page = Page;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        Paginated = await UserService.GetUserList(SUserID, key, page);
+        UserList = Paginated.Data;
+        isLoading = false;
+    } 
+    protected async Task Search()
+    {
+        page = 1;
+        await GetUserList(page);
+        StateHasChanged();
+    }
+    public async Task ModalPopulateForm(UserModel x, bool IsEdit)
+    {
+        await Modal.PopulateForm(x, IsEdit);
+    }
+    public async Task<ReturnGenericStatus> SaveUser()
+    {
+        isLoading = true;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDictionary x = await UserService.SaveUser(Modal.FormData);
+        OutputData.StatusMessage = x.StatusMessage;
+        OutputData.StatusCode = x.StatusCode;
+        Msg.ShowMsg(OutputData);
+        if (OutputData.StatusCode == "00")
+            await Initialize();
+        else
+            isLoading = false;
+        return OutputData;
+    }
+    public void AbleConfirm(int id, bool status)
+    {
+        ID = id;
+        Status = status;
+        ConfimationMsgAble = "Are you sure you want to " + (!Status ? "Disabled" : "Enabled") + " this?";
+        IsAbleModal = true;
+        StateHasChanged();
+    }
+    public async Task Able(bool IsConfirmed)
+    {
+        if (IsConfirmed)
+        {
+            isLoading = true;
+            string token = await GetAuth();
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            OutputData = await UserService.Able(ID, Status);
+            Msg.ShowMsg(OutputData);
+            if (OutputData.StatusCode == "00")
+                await Initialize();
+            else
+                isLoading = false;
+        }
+        IsAbleModal = false;
+        ID = 0;
+        StateHasChanged();
+    }
+    public void ActiveConfirm(int id, bool status)
+    {
+        ID = id;
+        Status = status;
+        ConfimationMsgActive = "Are you sure you want to " + (!Status ? "Deactivate" : "Reactivate") + " this?";
+        IsActiveModal = true;
+        StateHasChanged();
+    }
+    public async Task Activate(bool IsConfirmed)
+    {
+        if (IsConfirmed)
+        {
+            isLoading = true;
+            string token = await GetAuth();
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            OutputData = await UserService.Activate(ID, Status);
+            Msg.ShowMsg(OutputData);
+            if (OutputData.StatusCode == "00")
+                await Initialize();
+            else
+                isLoading = false;
+        }
+        IsActiveModal = false;
+        ID = 0;
+        StateHasChanged();
+    }
+    protected async Task DeleteUser(int id)
+    {
+        isLoading = true;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        OutputData = await UserService.DeleteUser(id);
+        Msg.ShowMsg(OutputData);
+        if (OutputData.StatusCode == "00")
+            await Initialize();
+        else
+            isLoading = false;
+    }
+    protected async Task PrintUser()
+    {
+        isLoading = true;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericData<ReturnDownloadPDF> FileByte = await UserService.PrintUser(SUserID);
+        isLoading = false;
+        if (FileByte.StatusCode == "00")
+        {
+            string base64Data = FileByte.Data.PdfDataBase64.Trim('"');
+            await JSRuntime.InvokeVoidAsync("downloadFile", "application/pdf", base64Data, FileByte.Data.FileName);
+        }
+        else
+        {
+            Msg.ShowMsg(new ReturnGenericStatus { StatusCode = FileByte.StatusCode, StatusMessage = FileByte.StatusMessage });
+        }
+    }
+
+    protected async Task TagInactiveUser()
+    {
+        isLoading = true;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await AuthServices.TagInactiveUsers(1);
+        isLoading = false;
+    }
+    protected async Task ClearAllUserSession()
+    {
+        isLoading = true;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await AuthServices.ClearAllSession();
+        isLoading = false;
+    }
+
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+}

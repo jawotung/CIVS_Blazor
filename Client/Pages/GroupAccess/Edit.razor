@@ -1,0 +1,116 @@
+﻿@page "/group-access/edit/{Id}"
+@using Application.Models
+@using WebAPI
+@using NetcodeHub.Packages.Components.Validations.OnInput
+
+<h3>Group Access Edit</h3>
+
+<EditForm Model="GroupAccessData" OnValidSubmit="Submit">
+    <div>
+        <div class="col-lg-6">
+            <label for="basic-url" class="form-label">Group</label>
+            <Text @bind-Value="GroupAccessData.GroupDesc" Label="Group" Type="text" class="form-control" disabled="true" />
+        </div>
+    </div>
+    <div class="mt-3">
+        <label for="basic-url" class="form-label">Menu Access</label>
+        @foreach (SelectListItem x in MenuList)
+        {
+            <div class="col-sm-6">
+                <div class="form-check">
+                    <InputCheckbox class="form-check-input" @bind-Value="x.IsChecked" name="SelectedActions" />
+                    <label class="form-check-label" for="@x.Value">
+                        @x.Text
+                    </label>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+    <div class="mt-3">
+        <a class="btn btn-link" href="/group-access">Back to list</a>
+    </div>
+</EditForm>
+
+
+<LoadingModal @ref="MdlLoading" IsLoading="isLoading"></LoadingModal>
+<Toast @ref="Msg"></Toast>
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private Toast Msg { get; set; }
+    private ReturnGenericStatus OutputData = new();
+
+    GroupAccessModel GroupAccessData = new();
+    List<SelectListItem> MenuList = new();
+
+    private LoadingModal MdlLoading;
+    private ConfirmationToast Confirmation { get; set; }
+    private bool IsConfirmationModalVisible = false;
+    private string ConfimationMsg = string.Empty;
+    private bool isLoading = false;
+    private int SelectedID;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Initialize();
+    }
+
+    protected async Task Initialize()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await GroupAccessServices.GetGroupAccess(int.Parse(Id));
+        if (result.StatusCode == "00")
+        {
+            GroupAccessData = result.Data;
+            var menu = await GroupAccessServices.GetGroupAccessMenuList();
+            if(result.StatusCode == "00")
+            {
+                MenuList = menu.Data;
+                foreach (SelectListItem x in MenuList)
+                {
+                    if (GroupAccessData.SelectedMenuIDs.IndexOf(x.Value) >= 0)
+                    {
+                        x.IsChecked = true;
+                    }
+                }
+                StateHasChanged();
+            }
+            else
+            {
+                OutputData.StatusCode = result.StatusCode;
+                OutputData.StatusMessage = result.StatusMessage;
+                Msg.ShowMsg(OutputData);
+            }
+        }
+        else
+        {
+            OutputData.StatusCode = result.StatusCode;
+            OutputData.StatusMessage = result.StatusMessage;
+            Msg.ShowMsg(OutputData);
+        }
+        isLoading = false;
+    }
+
+    protected async Task Submit()
+    {
+        isLoading = true;
+        GroupAccessData.SelectedMenuIDs = MenuList.Where(x => x.IsChecked).Select(x => x.Value).ToList<string>();
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await GroupAccessServices.GroupAccessEdit(GroupAccessData);
+        Msg.ShowMsg(result);
+        if(result.StatusCode == "00")
+            await Initialize();
+    }
+
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+}

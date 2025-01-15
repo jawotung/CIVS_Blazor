@@ -1,0 +1,70 @@
+﻿@using Application.Models
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 100000">
+    <div class="toast align-items-center text-white bg-@MsgColor border-0 @MsgToastClass" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="@MsgIcon"></i> @Msg
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+@code {
+    private bool MsgToast = false;
+    private string? MsgToastClass => MsgToast ? "show" : null;
+    private string MsgIcon;
+    private string Msg;
+    private string MsgColor;
+
+    public void ShowMsg(ReturnGenericStatus OutputData)
+    {
+        if (OutputData.StatusCode == "00")
+            ShowSuccess(OutputData.StatusMessage);
+        else if (OutputData.StatusCode == "02")
+            ShowInfo(OutputData.StatusMessage);
+        else if (OutputData.StatusCode == "04")
+            ShowWarning(OutputData.StatusMessage);
+        else
+            ShowError(OutputData.StatusMessage);
+    }
+    private void ShowSuccess(string PMsg)
+    {
+        Msg = PMsg;
+        MsgIcon = "fa fa-check";
+        MsgColor = "success";
+        ShowToast();
+    }
+    private void ShowError(string PMsg)
+    {
+        Msg = PMsg;
+        MsgIcon = "fa fa-exclamation-circle";
+        MsgColor = "danger";
+        ShowToast();
+    }
+    private void ShowToast()
+    {
+        MsgToast = !MsgToast;
+        StateHasChanged();
+        TimerToast();
+    }
+    private void ShowInfo(string PMsg)
+    {
+        Msg = PMsg;
+        MsgIcon = "fa fa-info-circle";
+        MsgColor = "info";
+        ShowToast();
+    }
+    private void ShowWarning(string PMsg)
+    {
+        Msg = PMsg;
+        MsgIcon = "fa fa-info-warning";
+        MsgColor = "warning";
+        ShowToast();
+    }
+    private async Task TimerToast()
+    {
+        await Task.Delay(2000);
+        MsgToast = false;
+        StateHasChanged();
+    }
+}

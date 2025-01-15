@@ -1,0 +1,218 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|c:\\users\\astung\\desktop\\cbs project\\civs\\client\\pages\\branch\\branch.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|solutionrelative:client\\pages\\branch\\branch.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|c:\\users\\astung\\desktop\\cbs project\\civs\\client\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|solutionrelative:client\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\client\\app.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|solutionrelative:client\\app.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\client\\_imports.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|solutionrelative:client\\_imports.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\client\\pages\\branch\\createeditbranch.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|solutionrelative:client\\pages\\branch\\createeditbranch.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\client\\pages\\useramountlimit\\createedituseramountlimit.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|solutionrelative:client\\pages\\useramountlimit\\createedituseramountlimit.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\client\\pages\\useramountlimit\\useramountlimit.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{571A751C-9618-4D33-9088-AFA3308A827B}|Client\\CIVSUI.csproj|solutionrelative:client\\pages\\useramountlimit\\useramountlimit.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33A19687-1373-444A-8BE2-D111B78FD980}|Server\\WebAPI.csproj|C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\server\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{33A19687-1373-444A-8BE2-D111B78FD980}|Server\\WebAPI.csproj|solutionrelative:server\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33A19687-1373-444A-8BE2-D111B78FD980}|Server\\WebAPI.csproj|C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\server\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33A19687-1373-444A-8BE2-D111B78FD980}|Server\\WebAPI.csproj|solutionrelative:server\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BB431512-C014-467E-BA51-F993BABA361B}|Infrastructure\\Infrastructure.csproj|C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\infrastructure\\common\\ibmias400.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB431512-C014-467E-BA51-F993BABA361B}|Infrastructure\\Infrastructure.csproj|solutionrelative:infrastructure\\common\\ibmias400.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2E93D08-71FE-4AA2-801D-C36F2EFAD263}|Application\\Application.csproj|C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\application\\models\\paginatedlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2E93D08-71FE-4AA2-801D-C36F2EFAD263}|Application\\Application.csproj|solutionrelative:application\\models\\paginatedlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BB431512-C014-467E-BA51-F993BABA361B}|Infrastructure\\Infrastructure.csproj|C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\infrastructure\\common\\commonclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB431512-C014-467E-BA51-F993BABA361B}|Infrastructure\\Infrastructure.csproj|solutionrelative:infrastructure\\common\\commonclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:13:0:{2456bd12-ecf7-4988-a4a6-67d49173f565}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Branch.razor",
+              "DocumentMoniker": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\Pages\\Branch\\Branch.razor",
+              "RelativeDocumentMoniker": "Client\\Pages\\Branch\\Branch.razor",
+              "ToolTip": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\Pages\\Branch\\Branch.razor [Read Only]",
+              "RelativeToolTip": "Client\\Pages\\Branch\\Branch.razor [Read Only]",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-01-09T09:06:38.376Z",
+              "EditorCaption": " [Read Only]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CreateEditBranch.razor",
+              "DocumentMoniker": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\Pages\\Branch\\CreateEditBranch.razor",
+              "RelativeDocumentMoniker": "Client\\Pages\\Branch\\CreateEditBranch.razor",
+              "ToolTip": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\Pages\\Branch\\CreateEditBranch.razor [Read Only]",
+              "RelativeToolTip": "Client\\Pages\\Branch\\CreateEditBranch.razor [Read Only]",
+              "ViewState": "AQIAAAMAAAAAAAAAAAAAAAcAAAAaAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-01-09T02:15:18.619Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "CreateEditUserAmountLimit.razor",
+              "DocumentMoniker": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\Pages\\UserAmountLimit\\CreateEditUserAmountLimit.razor",
+              "RelativeDocumentMoniker": "Client\\Pages\\UserAmountLimit\\CreateEditUserAmountLimit.razor",
+              "ToolTip": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\Pages\\UserAmountLimit\\CreateEditUserAmountLimit.razor [Read Only]",
+              "RelativeToolTip": "Client\\Pages\\UserAmountLimit\\CreateEditUserAmountLimit.razor [Read Only]",
+              "ViewState": "AQIAAC0AAAAAAAAAAAAAADYAAAAhAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-01-09T02:06:32.388Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "UserAmountLimit.razor",
+              "DocumentMoniker": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\Pages\\UserAmountLimit\\UserAmountLimit.razor",
+              "RelativeDocumentMoniker": "Client\\Pages\\UserAmountLimit\\UserAmountLimit.razor",
+              "ToolTip": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\Pages\\UserAmountLimit\\UserAmountLimit.razor [Read Only]",
+              "RelativeToolTip": "Client\\Pages\\UserAmountLimit\\UserAmountLimit.razor [Read Only]",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-01-09T02:06:30.782Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "App.razor",
+              "DocumentMoniker": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\App.razor",
+              "RelativeDocumentMoniker": "Client\\App.razor",
+              "ToolTip": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\App.razor [Read Only]",
+              "RelativeToolTip": "Client\\App.razor [Read Only]",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-01-08T08:15:09.179Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "_Imports.razor",
+              "DocumentMoniker": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\_Imports.razor",
+              "RelativeDocumentMoniker": "Client\\_Imports.razor",
+              "ToolTip": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\_Imports.razor [Read Only]",
+              "RelativeToolTip": "Client\\_Imports.razor [Read Only]",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-01-08T08:16:14.308Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\Program.cs",
+              "RelativeDocumentMoniker": "Client\\Program.cs",
+              "ToolTip": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Client\\Program.cs [Read Only]",
+              "RelativeToolTip": "Client\\Program.cs [Read Only]",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAMAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-08T08:15:01.226Z",
+              "EditorCaption": " [Read Only]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Server\\Program.cs",
+              "RelativeDocumentMoniker": "Server\\Program.cs",
+              "ToolTip": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Server\\Program.cs [Read Only]",
+              "RelativeToolTip": "Server\\Program.cs [Read Only]",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-08T08:14:45.589Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Server\\appsettings.json",
+              "RelativeDocumentMoniker": "Server\\appsettings.json",
+              "ToolTip": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Server\\appsettings.json [Read Only]",
+              "RelativeToolTip": "Server\\appsettings.json [Read Only]",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAAEAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-01-08T01:34:28.401Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "IBMiAS400.cs",
+              "DocumentMoniker": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Infrastructure\\Common\\IBMiAS400.cs",
+              "RelativeDocumentMoniker": "Infrastructure\\Common\\IBMiAS400.cs",
+              "ToolTip": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Infrastructure\\Common\\IBMiAS400.cs",
+              "RelativeToolTip": "Infrastructure\\Common\\IBMiAS400.cs",
+              "ViewState": "AQIAAIAAAAAAAAAAAAAgwAIAAAAWAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-08T01:33:53.194Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "PaginatedList.cs",
+              "DocumentMoniker": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Application\\Models\\PaginatedList.cs",
+              "RelativeDocumentMoniker": "Application\\Models\\PaginatedList.cs",
+              "ToolTip": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Application\\Models\\PaginatedList.cs [Read Only]",
+              "RelativeToolTip": "Application\\Models\\PaginatedList.cs [Read Only]",
+              "ViewState": "AQIAACYAAAAAAAAAAAAswDEAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-07T02:59:57.643Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "CommonClass.cs",
+              "DocumentMoniker": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Infrastructure\\Common\\CommonClass.cs",
+              "RelativeDocumentMoniker": "Infrastructure\\Common\\CommonClass.cs",
+              "ToolTip": "C:\\Users\\astung\\Desktop\\CBS Project\\CIVS\\Infrastructure\\Common\\CommonClass.cs [Read Only]",
+              "RelativeToolTip": "Infrastructure\\Common\\CommonClass.cs [Read Only]",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-07T02:59:46.162Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

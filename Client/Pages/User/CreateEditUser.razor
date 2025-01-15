@@ -1,0 +1,151 @@
+﻿@using Application.Models
+@using WebAPI
+@using NetcodeHub.Packages.Components.Validations.OnInput
+
+<UIModal Title="User" ModalSize="modal-lg" @ref="uiModal">
+    <EditForm Model="FormData" OnValidSubmit="Submit">
+        <DataAnnotationsValidator />
+        <div class="form">
+            <input type="hidden" id="id" @bind="FormData.Id" />
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">User ID<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.UserId" Label="UserId" Type="text" class="form-control" disabled="@IsUserIdDisabled" />
+                        <ValidationMessage For="@(() => FormData!.UserId)" />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Employee Number</label>
+                        <Text @bind-Value="FormData.EmployeeNumber" Label="EmployeeNumber" Type="text" class="form-control" disabled="@IsDisabled" />
+                        <ValidationMessage For="@(() => FormData!.EmployeeNumber)" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">User Name</label>
+                        <Text @bind-Value="FormData.UserDisplayName" Label="UserDisplayName" Type="text" class="form-control" disabled />
+                        <ValidationMessage For="@(() => FormData!.UserDisplayName)" />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">User Type<span class="text-danger">*</span></label>
+                        <select @bind="FormData.UserType" class="form-control" disabled="@IsDisabled">
+                            <option value="">-- Select an option --</option>
+                            @if (DDlUserType != null)
+                                @foreach (SelectListItem x in DDlUserType)
+                                {
+                                    <option value="@x.Value">@x.Text</option>
+                                }
+                        </select>
+                        <ValidationMessage For="@(() => FormData!.UserType)" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Branch of Assignment<span class="text-danger">*</span></label>
+                        <select @bind="FormData.BranchOfAssignment" class="form-control" disabled="@IsDisabled">
+                            <option value="">-- Select an option --</option>
+                            @if (DDlBranchOfAssignment != null)
+                                @foreach (SelectListItem x in DDlBranchOfAssignment)
+                                {
+                                    <option value="@x.Value">@x.Text</option>
+                                }
+                        </select>
+                        <ValidationMessage For="@(() => FormData!.BranchOfAssignment)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2 @FooterCol">
+                <button type="button" class="btn btn-secondary btn btn-secondary w-100" data-dismiss="modal" @onclick="() => uiModal.CloseModal()">Close</button>
+            </div>
+            <div class="col-sm-2 @SaveSubmit">
+                <button type="submit" class="btn btn-primary btn btn-secondary w-100">Save</button>
+            </div>
+        </div>
+    </EditForm>
+</UIModal>
+
+@inject IUserServices UserServices
+@code {
+    [Parameter]
+    public CIVSUI.Pages.User.User ParentPage { get; set; }
+    private UIModal uiModal;
+    public UserModel FormData = new();
+    private ReturnGenericStatus OutputData = new();
+    public List<SelectListItem> DDlUserType;
+    public List<SelectListItem> DDlBranchOfAssignment;
+    private bool IsDisabled;
+    private bool IsUserIdDisabled;
+    private string FooterCol = "offset-sm-8";
+    private string SaveSubmit = "show";
+
+    protected async Task GetBranchOfAssignmentList()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDropdown r = await UserServices.GetBranchOfAssignmentList();
+        DDlBranchOfAssignment = r.Data;
+    }
+    protected async Task GetUserTypeList()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDropdown r = await UserServices.GetUserTypeList();
+        DDlUserType = r.Data;
+    }
+    public async Task Submit()
+    {
+        OutputData = await ParentPage.SaveUser();
+        if (OutputData.StatusCode == "00")
+            uiModal.CloseModal();
+    }
+    public async Task CreateNew()
+    {
+        FormData = new();
+        await Clear();
+        uiModal.ShowModal();
+    }
+    public async Task PopulateForm(UserModel x, bool IsEdit)
+    {
+        FormData = x;
+        await Clear();
+        if (IsEdit)
+        {
+            IsUserIdDisabled = true;
+        }
+        else
+        {
+            SaveSubmit = "hide";
+            FooterCol = "offset-sm-10";
+            IsUserIdDisabled = true;
+            IsDisabled = true;
+        }
+        uiModal.ShowModal();
+        StateHasChanged();
+    }
+    public async Task Clear()
+    {
+        FooterCol = "offset-sm-8"; 
+        SaveSubmit = "show";
+        IsUserIdDisabled = false;
+        IsDisabled = false;
+        if (DDlUserType == null)
+        {
+            await GetUserTypeList();
+            await GetBranchOfAssignmentList();
+        }
+    }
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+}

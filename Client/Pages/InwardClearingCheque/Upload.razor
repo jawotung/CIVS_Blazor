@@ -1,0 +1,324 @@
+﻿@page "/inward-clearing-cheque/Create"
+@using Application.Models
+@using Application.Service
+@using WebAPI
+@using Microsoft.JSInterop
+@using System.IO;
+@using Microsoft.AspNetCore.Http;
+
+<PageTitle>Inward Clearing Cheque Upload</PageTitle>
+
+<h3 class="Page-Header">Inward Clearing Cheque Upload</h3>
+
+<EditForm Model="FormData" OnValidSubmit="Submit">
+    <DataAnnotationsValidator />
+    <div class="form">
+        <div class="mb-3 row">
+            <label for="staticEmail" class="col-sm-4 col-form-label" style="font-weight: bold;">Upload Check Image File</label>
+            <div class="col-sm-8">
+                <InputFile class="form-control" id="fileUpload" OnChange="HandleFileUpload" accept="image/jpg,image/tiff" multiple MaxAllowedFiles="@int.MaxValue" />
+            </div>
+            <div class="col-sm-8 offset-4">
+                <ValidationMessage For="@(() => FormData!.FileUpload)" />
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="staticEmail" class="col-sm-4 col-form-label" style="font-weight: bold;">Transaction Date</label>
+            <div class="col-sm-8">
+                <input id="TransactionDate" class="form-control" type="date" @bind="FormData.TransactionDate" />
+            </div>
+            <div class="col-sm-8 offset-4">
+                <ValidationMessage For="@(() => FormData!.TransactionDate)" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-2 offset-10">
+            <button type="submit" class="btn btn-primary w-100" disabled="@UploadIsDisabled"><i class="fa fa-upload"></i> Upload</button>
+        </div>
+    </div>
+</EditForm>
+
+<hr />
+<div class="row">
+    <div class="col-sm-3">
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="lblField">Total Selected File(s):</label>
+            </div>
+            <div class="col-sm-6">
+                <label class="lblValue">@TotalFile</label>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="lblField">Uploaded file(s):</label>
+            </div>
+            <div class="col-sm-6">
+                <label class="lblValue">@TotalFileSize</label>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="lblField">Rejected file(s):</label>
+            </div>
+            <div class="col-sm-6">
+                <label class="lblValue">@RejectedFile</label>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="lblField">Saved file(s):</label>
+            </div>
+            <div class="col-sm-6">
+                <label class="lblValue">@SavedFile</label>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-3">
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="lblField">Details:</label>
+            </div>
+            <div class="col-sm-6">
+                <label class="lblValue">
+                    @DetailsCount
+                    <span class="@(DetailsResult.StatusCode == "00" ? "text-success" : "text-danger")"> @DetailsResult.StatusMessage</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="lblField">History:</label>
+            </div>
+            <div class="col-sm-6">
+                <label class="lblValue">
+                    @HistoryCount
+                    <span class="@(HistoryResult.StatusCode == "00" ? "text-success" : "text-danger")"> @HistoryResult.StatusMessage</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="lblField">Images:</label>
+            </div>
+            <div class="col-sm-6">
+                <label class="lblValue">
+                    @ImageCount
+                    <span class="@(ImageResult.StatusCode == "00" ? "text-success" : "text-danger")"> @ImageResult.StatusMessage</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="lblField">Accounts:</label>
+            </div>
+            <div class="col-sm-6">
+                <label class="lblValue">
+                    @AccountCount
+                    <span class="@(AccountResult.StatusCode == "00" ? "text-success" : "text-danger")"> @AccountResult.StatusMessage</span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+<hr />
+<div style="height:400px;overflow:auto">
+@foreach (ClientFormFile file in FileUpload)
+{
+    <div class="row" style="margin-top:15px">
+        <div class="col-sm-2" style="font-size: 40px;">
+            <i class="fa fa-file-image"></i>
+        </div>
+        <div class="col-sm-6" style="margin-top: 15px;"><p>@file.FileName</p></div>
+        <div class="col-sm-2"><span class="btn @file.ButtonStatus">@file.Status</span></div>
+        <div class="col-sm-2"><p class="@file.MsgStatus">@file.Msg</p></div>
+    </div>
+    <hr />
+}
+</div>
+<Toast @ref="Msg"></Toast>
+
+<LoadingModal @ref="MdlLoading" IsLoading="@isLoading"></LoadingModal>
+
+@inject IInwardClearingChequeUploadServices InwardClearingChequeUploadIServices
+@code {
+    private Toast Msg { get; set; }
+    private LoadingModal MdlLoading;
+    private ReturnGenericStatus OutputData = new();
+    private MCheckImageUpload FormData = new();
+    private List<ClientFormFile> FileUpload = new List<ClientFormFile>();
+    private bool isLoading = true;
+    private InwardClearingChequeUploadReturn data = new InwardClearingChequeUploadReturn { DetailsModelList = new(), ImageModelList = new(), HistoryModelList = new(), AccountModelList = new(), };
+    private string TotalFile = "0", TotalFileSize = "0";
+    private int RejectedFile = 0,SavedFile = 0;
+    private ReturnGenericStatus DetailsResult = new();
+    private ReturnGenericStatus HistoryResult = new();
+    private ReturnGenericStatus ImageResult = new();
+    private ReturnGenericStatus AccountResult = new();
+    private int DetailsCount = 0;
+    private int HistoryCount = 0;
+    private int ImageCount = 0;
+    private int AccountCount = 0;
+    private bool UploadIsDisabled = false;
+    protected override async Task OnInitializedAsync()
+    {
+        await Initialize();
+    }
+    protected async Task Initialize()
+    {
+        isLoading = false;
+        StateHasChanged();
+    }
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        isLoading = true;
+        Clear();
+        long TotalSize = 0;
+        FileUpload = new List<ClientFormFile>();
+        var files = e.GetMultipleFiles(int.MaxValue);
+        foreach (var file in files)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.OpenReadStream().CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+                var clientFile = new ClientFormFile
+                    {
+                        FileName = file.Name,
+                        Name = file.Name.Replace("." + file.Name.Split('.')[file.Name.Split('.').Length - 1],""),
+                        ContentType = file.ContentType,
+                        FileByte = fileBytes,
+                        ButtonStatus = "btn-info",
+                        Status = "Pending",
+                        Msg = "Please click upload",
+                        MsgStatus = "text-info",
+                    };
+                TotalSize += file.Size;
+                FileUpload.Add(clientFile);
+                FormData.FileUpload = clientFile;
+            }
+        }
+        TotalFile = files.Count().ToString();
+        TotalFileSize = FormatByteSize(TotalSize);
+        Msg.ShowMsg(new ReturnGenericStatus
+        {
+                StatusMessage = "Total Selected File(s): " + TotalFile + "  Size: " + TotalFileSize,
+            StatusCode = "02"
+        });
+        StateHasChanged();
+        isLoading = false ;
+    }
+    protected async Task Submit()
+    {
+        UploadIsDisabled = true;
+        RejectedFile = 0; SavedFile = 0;
+        bool IsSuccess = false;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        InwardClearingChequeUploadReturn data = new InwardClearingChequeUploadReturn { DetailsModelList = new(),ImageModelList = new(), HistoryModelList = new(), AccountModelList = new(), };
+        StateHasChanged(); 
+        foreach (ClientFormFile i in FileUpload)
+        {
+            i.ButtonStatus = "btn-warning";
+            i.Status = "Uploading";
+            i.Status = "Sending";
+            StateHasChanged();
+            FormData.FileUpload = i;
+            ReturnGenericData<InwardClearingChequeUploadReturn> UploadChequeReturn = await InwardClearingChequeUploadIServices.UploadCheque(FormData);
+            i.Msg = UploadChequeReturn.StatusMessage;
+            i.MsgStatus = UploadChequeReturn.StatusCode == "00" ? "text-success" : "text-danger";
+            if (UploadChequeReturn.StatusCode == "00")
+            {
+                i.ButtonStatus = "btn-success";
+                i.Status = "Sent";
+                var x = UploadChequeReturn.Data;
+                if (x.DetailsModelList.FirstOrDefault() != null)
+                    data.DetailsModelList.Add(x.DetailsModelList.FirstOrDefault());
+                if (x.ImageModelList.FirstOrDefault() != null)
+                    data.ImageModelList.Add(x.ImageModelList.FirstOrDefault());
+                if (x.HistoryModelList.FirstOrDefault() != null)
+                    data.HistoryModelList.Add(x.HistoryModelList.FirstOrDefault());
+                if (x.AccountModelList.FirstOrDefault() != null)
+                    data.AccountModelList.Add(x.AccountModelList.FirstOrDefault());
+                IsSuccess = true;
+                SavedFile++;
+            }
+            else
+            {
+                RejectedFile++;
+                i.ButtonStatus = "btn-danger";
+                i.Status = "Failed";
+            }
+            StateHasChanged();
+        }
+        if (IsSuccess)
+        {
+            ReturnGenericData<MReturnSaveImage> r = await InwardClearingChequeUploadIServices.SaveImage(data);
+            DetailsResult = r.Data.DetailsResult;
+            HistoryResult = r.Data.HistoryResult;
+            ImageResult = r.Data.ImageResult;
+            AccountResult = r.Data.AccountResult;
+            OutputData.StatusMessage = r.StatusMessage;
+            OutputData.StatusCode = r.StatusCode;
+            if (OutputData.StatusCode == "01")
+            {
+                RejectedFile = SavedFile; SavedFile = 0;
+            }
+            Msg.ShowMsg(OutputData);
+        }
+        DetailsCount = data.DetailsModelList.GroupBy(d => d.ChequeImageLinkedKey).ToList().Count();
+        HistoryCount = data.HistoryModelList.GroupBy(d => d.ChequeImageLinkedKey).ToList().Count();
+        ImageCount = data.ImageModelList.GroupBy(d => d.ChequeImageLinkedKey).ToList().Count();
+        AccountCount = data.AccountModelList.GroupBy(d => d.ChequeImageLinkedKey).ToList().Count();
+        UploadIsDisabled = false;
+        StateHasChanged();
+    }
+    public static string FormatByteSize(long bytes)
+    {
+        string[] suffixes = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+        int suffixIndex = 0;
+        double size = bytes;
+
+        while (size >= 1024 && suffixIndex < suffixes.Length - 1)
+        {
+            suffixIndex++;
+            size /= 1024;
+        }
+
+        return $"{size:0.##} {suffixes[suffixIndex]}";
+    }
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+    private void Clear()
+    {
+        data = new InwardClearingChequeUploadReturn { DetailsModelList = new(), ImageModelList = new(), HistoryModelList = new(), AccountModelList = new(), };
+        TotalFile = "0"; TotalFileSize = "0";
+        RejectedFile = 0;  SavedFile = 0;
+        DetailsCount = 0;
+        HistoryCount = 0;
+        ImageCount = 0;
+        AccountCount = 0;
+        DetailsResult = new();
+        HistoryResult = new();
+        ImageResult = new();
+        AccountResult = new();
+        UploadIsDisabled = false;
+    }
+}

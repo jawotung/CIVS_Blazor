@@ -1,0 +1,113 @@
+﻿@page "/group/details/{Id}"
+@using Application.Models
+@using WebAPI
+
+<h3>Group Details</h3>
+
+<div class="col-lg-6">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="fw-bold">Group Code</div>
+            <div class="fw-bold">Menu Desc</div>
+            <div class="fw-bold">Deleted</div>
+        </div>
+        <div class="col-sm-6 display-block">
+            <div class="">@GroupModel.GroupCode</div>
+            <div class="">@GroupModel.GroupDesc</div>
+            <div class="">
+                <input class="form-check-input" type="checkbox" value="@GroupModel.Isdeleted" checked="@GroupModel.Isdeleted" disabled>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mt-3">
+    @if (GroupModel.Isdeleted)
+    {
+        @if (GroupModel.AccessAction == "Edit")
+        {
+            <a class="btn btn-link" href="group-access/edit/@GroupModel.Id">View Access</a>
+        }
+        else
+        {
+            <i>View Access</i>
+        }
+        <i> |</i>
+        @if (GroupModel.MemberAction == "Edit")
+        {
+            <a type="button" class="btn btn-link">View Member</a>
+        }
+        else
+        {
+            <a type="button" class="btn btn-link">View Member</a>
+            <i>View Member</i>
+        }
+    }
+    else
+    {
+        <a type="button" class="btn btn-link" href="group-access/edit/@GroupModel.Id">Assign Access</a>
+
+        <i> |</i>
+        @if (GroupModel.AccessAction == "Edit")
+        {
+            <a type="button" class="btn btn-link" href="group-access/details/@GroupModel.Id">View Access</a>
+        }
+        else
+        {
+            <i>View Access</i>
+        }
+        <i> |</i>
+        <a type="button" class="btn btn-link" href="group-member/edit/@GroupModel.Id">Assign Member</a>
+        <i> |</i>
+        @if (GroupModel.MemberAction == "Edit")
+        {
+            <a type="button" class="btn btn-link" href="group-member/details/@GroupModel.Id">View Member</a>
+        }
+        else
+        {
+            <a type="button" class="btn btn-link">View Member</a>
+        }
+    }<i> |</i>
+    <a class="btn btn-link" href="/group">Back to list</a>
+  
+</div>
+
+<LoadingModal @ref="MdlLoading" IsLoading="isLoading"></LoadingModal>
+<Toast @ref="Msg"></Toast>
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    ReturnGroup GroupModel = new();
+    ReturnGenericStatus message = new();
+    private LoadingModal MdlLoading;
+    private Toast Msg { get; set; }
+
+    private bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Initialize();
+    }
+
+    protected async Task Initialize()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var result = await GroupServices.GetGroupDetails(int.Parse(Id));
+        if(result.StatusCode == "00")
+            GroupModel = result.Data;
+        else
+        {
+            message.StatusCode = result.StatusCode;
+            message.StatusMessage = result.StatusMessage;
+            Msg.ShowMsg(message);
+        }
+        isLoading = false;
+    }   
+
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+}

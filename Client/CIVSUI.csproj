@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>$(AssemblyName.Replace(' ', '_'))</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\bootstrap\bootstrap-grid.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-grid.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-grid.rtl.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-grid.rtl.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-reboot.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-reboot.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-reboot.rtl.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-reboot.rtl.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-utilities.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-utilities.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-utilities.rtl.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-utilities.rtl.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap.rtl.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap.rtl.min.css.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="8.0.4" />
+	  <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.4" />
+	  <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.2" />
+	  <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.2" PrivateAssets="all" />
+	  <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="8.0.4" />
+	  <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.JSInterop" Version="8.0.4" />
+	  <PackageReference Include="NetcodeHub.Packages.Components.Validations" Version="1.0.1" />
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	  <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Application\Application.csproj" />
+  </ItemGroup>
+
+</Project>

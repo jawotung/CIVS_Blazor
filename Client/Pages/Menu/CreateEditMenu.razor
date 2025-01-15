@@ -1,0 +1,213 @@
+﻿@using Application.Models
+@using WebAPI
+@using NetcodeHub.Packages.Components.Validations.OnInput
+
+<UIModal Title="Menu" ModalSize="modal-lg" @ref="uiModal">
+    <EditForm Model="FormData" OnValidSubmit="Submit">
+        <DataAnnotationsValidator />
+        <div class="form">
+            <input type="hidden" id="id" @bind="FormData.Id" />
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Menu Code<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.MenuCode" Label="MenuCode" Type="text" class="form-control" disabled="@IsMenuCodeDisabled" />
+                        <ValidationMessage For="@(() => FormData!.MenuCode)" />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Menu Desc<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.MenuDesc" Label="MenuDesc" Type="text" class="form-control" disabled="@IsDisabled" />
+                        <ValidationMessage For="@(() => FormData!.MenuDesc)" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Contoller</label>
+                        <select @bind="FormData.Controller" class="form-control" disabled="@IsDisabled">
+                            <option value="">-- Select an option --</option>
+                            @if (DDlController != null)
+                                @foreach (SelectListItem x in DDlController)
+                                {
+                                    <option value="@x.Value">@x.Text</option>
+                                }
+                        </select>
+                        <ValidationMessage For="@(() => FormData!.Controller)" />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Action Method</label>
+                        <select @bind="FormData.ActionMethod" class="form-control" disabled="@IsDisabled">
+                            <option value="">-- Select an option --</option>
+                            @if (DDlActionMethod != null)
+                                @foreach (SelectListItem x in DDlActionMethod)
+                                {
+                                    <option value="@x.Value">@x.Text</option>
+                                }
+                        </select>
+                        <ValidationMessage For="@(() => FormData!.ActionMethod)" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Action Method Parameters</label>
+                        <select @bind="FormData.ActionMethodParam" class="form-control" disabled="@IsDisabled">
+                            <option value="">-- Select an option --</option>
+                            @if (DDlActionMethodParam != null)
+                                @foreach (SelectListItem x in DDlActionMethodParam)
+                                {
+                                    <option value="@x.Value">@x.Text</option>
+                                }
+                        </select>
+                        <ValidationMessage For="@(() => FormData!.ActionMethodParam)" />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Is Root Menu?</label>
+                        <div>
+                            <InputCheckbox class="form-check-input" @bind-Value="FormData.RootMenu" name="RootMenu" disabled="@IsDisabled" />
+                            <ValidationMessage For="@(() => FormData!.RootMenu)" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="mb-3">
+                        <label class="form-label">Sub Menu</label>
+                        <div class="row">
+                        @if (DDlSubmenu != null)
+                        foreach (SelectListItem x in DDlSubmenu)
+                        {
+                            <div class="col-sm-6">
+                                <div class="form-check">
+                                    <InputCheckbox class="form-check-input" @bind-Value="x.IsChecked" name="SelectedActions" disabled="@IsDisabled"/>
+                                    <label class="form-check-label" for="@x.Value">
+                                        @x.Text
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2 @FooterCol">
+                <button type="button" class="btn btn-secondary btn btn-secondary w-100" data-dismiss="modal" @onclick="() => uiModal.CloseModal()">Close</button>
+            </div>
+            <div class="col-sm-2 @SaveSubmit">
+                <button type="submit" class="btn btn-primary btn btn-secondary w-100">Save</button>
+            </div>
+        </div>
+    </EditForm>
+</UIModal>
+@inject IMenuServices MenuServices
+@code {
+    [Parameter]
+    public CIVSUI.Pages.Menu.Menu ParentPage { get; set; }
+    private UIModal uiModal;
+    public MenuModel FormData = new();
+    public List<SelectListItem> DDlController;
+    public List<SelectListItem> DDlSubmenu;
+    public List<SelectListItem> DDlActionMethod;
+    public List<SelectListItem> DDlActionMethodParam;
+    private ReturnGenericStatus OutputData = new();
+    private bool IsMenuCodeDisabled;
+    private bool IsDisabled;
+    private string FooterCol = "offset-sm-8";
+    private string SaveSubmit = "show";
+
+    protected async Task GetControllerList()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDropdown r = await MenuServices.GetControllerList();
+        DDlController = r.Data;
+    }
+    protected async Task GetSubmenuList()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDropdown r = await MenuServices.GetSubmenuList();
+        DDlSubmenu = r.Data;
+    }
+    protected async Task GetActionMethodList()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDropdown r = await MenuServices.GetActionMethodList();
+        DDlActionMethod = r.Data;
+    }
+    protected async Task GetActionMethodParamList()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDropdown r = await MenuServices.GetActionMethodParamList();
+        DDlActionMethodParam = r.Data;
+    }
+
+    public async Task Submit()
+    {
+        FormData.SelectedSubMenus = DDlSubmenu.Where(x => x.IsChecked).Select(x => x.Value).ToList<string>();
+        OutputData = await ParentPage.SaveMenu();
+        if (OutputData.StatusCode == "00")
+            uiModal.CloseModal();
+    }
+    public async Task CreateNew()
+    {
+        FormData = new();
+        await Clear();
+        uiModal.ShowModal();
+    }
+    public async Task PopulateForm(MenuModel x, bool IsEdit)
+    {
+        await Clear();
+        if (IsEdit)
+        {
+            IsMenuCodeDisabled = true;
+            IsDisabled = false;
+        }
+        else
+        {
+            IsMenuCodeDisabled = true;
+            IsDisabled = true;
+        }
+        foreach (string item in (x.SubMenus ?? "").Split(','))
+        {
+            var data = DDlSubmenu.FirstOrDefault(a => a.Value.Trim() == item.Trim());
+            if (data != null)
+                data.IsChecked = true;
+        }
+        FormData = x;
+        uiModal.ShowModal();
+    }
+    public async Task Clear()
+    {
+        IsMenuCodeDisabled = false;
+        IsDisabled = false;
+        if(DDlActionMethodParam == null)
+        {
+            await GetControllerList();
+            await GetSubmenuList();
+            await GetActionMethodList();
+            await GetActionMethodParamList();
+        }
+        foreach (SelectListItem x in DDlSubmenu)
+        {
+            x.IsChecked = false;
+        }
+    }
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+}

@@ -1,0 +1,130 @@
+﻿@page "/group-member"
+@using Application.Models
+@using NetcodeHub.Packages.Components.Validations.OnInput
+@using WebAPI
+@using System.IO
+@inject NavigationManager Navigation
+
+<h3>Group Access List</h3>
+<div>
+    <a class="btn btn-link" href="/group">Back to group</a>
+</div>
+<table class="table table-striped table-hover table-bordered ">
+    <thead>
+        <tr class="table-dark">
+            <th style="width: 30%;">Group</th>
+            <th style="width: 40%;">Member</th>
+            <th style="width: 12%;">Deleted</th>
+            <th style="width: 18%;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var x in groupsMember)
+        {
+            <tr>
+                <td style="width: 30%;">@x.GroupDesc</td>
+                <td style="width: 40%;">@x.UserTypesDesc</td>
+                <td style="width: 12%;">
+                    <input class="form-check-input" type="checkbox" value="@x.Isdeleted" checked="@x.Isdeleted" disabled>
+                </td>
+                <td style="width: 18%;">
+                    <button type="button" class="btn btn-sm btn-success" @onclick="() => OnClickView(x)"><i class="fa fa-eye"></i></button>
+                    @if (x.Isdeleted == false)
+                    {
+                        <button type="button" class="btn btn-sm btn-info" @onclick="() => OnClickEdit(x)"><i class="fa fa-edit"></i></button>
+                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => DeleteConfirmation(x.Id)"><i class="fa fa-trash"></i></button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<UIPagination CurrentPage="page"
+                TotalPages="Paginated.TotalPages"
+                HasPreviousPage="Paginated.HasPreviousPage"
+                HasNextPage="Paginated.HasNextPage"
+                CountData="Paginated.CountData"
+                OnPageChanged="Initialize" />
+
+<ConfirmationToast @ref="Confirmation"
+                   ConfimationMsg="@ConfimationMsg"
+                   OnConfirm="OnClickDelete"
+                   IsVisible="@IsConfirmationModalVisible">
+</ConfirmationToast>
+
+<LoadingModal @ref="MdlLoading" IsLoading="isLoading"></LoadingModal>
+<Toast @ref="Msg"></Toast>
+@code {
+
+    private PaginatedOutputServices<GroupMemberModel> Paginated;
+    private List<GroupMemberModel> groupsMember = new List<GroupMemberModel>();
+    private int page = 1;
+    GroupMemberModel GroupMemberModel = new();
+    private Toast Msg { get; set; }
+    private ReturnGenericStatus OutputData = new();
+
+    private LoadingModal MdlLoading;
+    private ConfirmationToast Confirmation { get; set; }
+    private bool IsConfirmationModalVisible = false;
+    private string ConfimationMsg = string.Empty;
+    private bool isLoading = true;
+    private int SelectedID;
+
+    async Task Initialize(int Page)
+    {
+        isLoading = true;
+        page = Page;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        Paginated = await GroupMemberServices.GetGroupMemberList(Page);
+        groupsMember = Paginated.Data;
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Initialize(page);
+    }
+
+    protected async void OnClickView(GroupMemberModel detail)
+    {
+        Navigation.NavigateTo($"/group-member/details/{detail.Id}");
+    }
+
+    private void OnClickEdit(GroupMemberModel detail)
+    {
+        Navigation.NavigateTo($"/group-member/edit/{detail.Id}");
+    }
+
+    private void DeleteConfirmation(int id)
+    {
+        ConfimationMsg = "";
+        SelectedID = id;
+        ConfimationMsg = "Are you sure you want to delete this?";
+        IsConfirmationModalVisible = true;
+    }
+
+    private async void OnClickDelete(bool IsConfirmed)
+    {
+        if (IsConfirmed)
+        {
+            isLoading = true;
+            string token = await GetAuth();
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var result = await GroupMemberServices.GroupMemberDeleteConfirmed(SelectedID);
+            Msg.ShowMsg(result);
+            if (result.StatusCode == "00")
+                await Initialize(page);
+            else
+                isLoading = false;
+        }
+        IsConfirmationModalVisible = false;
+        SelectedID = 0;
+    }
+
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+}

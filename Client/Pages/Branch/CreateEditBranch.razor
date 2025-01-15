@@ -1,0 +1,100 @@
+﻿@using Application.Models
+@using WebAPI
+@using NetcodeHub.Packages.Components.Validations.OnInput
+
+<UIModal Title="Branch" ModalSize="modal-lg" @ref="uiModal">
+    <EditForm Model="FormData" OnValidSubmit="Submit">
+        <DataAnnotationsValidator />
+        <div class="form">
+            <input type="hidden" id="id" @bind="FormData.Id" />
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Branch Code<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.BranchCode" Label="BranchCode" Type="text" class="form-control" disabled="@IsBranchCodeDisabled" />
+                        <ValidationMessage For="@(() => FormData!.BranchCode)" />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Branch Brstn<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.BranchBrstn" Label="BranchBrstn" Type="text" class="form-control"  disabled="@IsDisabled" />
+                        <ValidationMessage For="@(() => FormData!.BranchBrstn)" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Branch Desc<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.BranchDesc" Label="BranchDesc" Type="text" class="form-control"  disabled="@IsDisabled" />
+                        <ValidationMessage For="@(() => FormData!.BranchDesc)" />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Branch Email</label>
+                        <Text @bind-Value="FormData.BranchEmail" Label="BranchEmail" Type="text" class="form-control" disabled="@IsDisabled" />
+                        <ValidationMessage For="@(() => FormData!.BranchEmail)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2 @FooterCol">
+                <button type="button" class="btn btn-secondary btn btn-secondary w-100" data-dismiss="modal" @onclick="() => uiModal.CloseModal()">Close</button>
+            </div>
+            <div class="col-sm-2 @SaveSubmit">
+                <button type="submit" class="btn btn-primary btn btn-secondary w-100">Save</button>
+            </div>
+        </div>
+    </EditForm>
+</UIModal>
+
+@code {
+    [Parameter]
+    public CIVSUI.Pages.Branch.Branch ParentPage { get; set; }
+    private UIModal uiModal;
+    public BranchModel FormData = new();
+    private ReturnGenericStatus OutputData = new();
+    private bool IsDisabled;
+    private bool IsBranchCodeDisabled;
+    private string FooterCol = "offset-sm-8";
+    private string SaveSubmit = "show";
+    public async Task Submit()
+    {
+        OutputData = await ParentPage.SaveBranch();
+        if (OutputData.StatusCode == "00")
+            uiModal.CloseModal();
+    }
+    public void CreateNew()
+    {
+        FormData = new();
+        Clear();
+        uiModal.ShowModal();
+    }
+    public void PopulateForm(BranchModel x,bool IsEdit)
+    {
+        FormData = x;
+        uiModal.ShowModal();
+        Clear();
+        if (IsEdit)
+        {
+            IsBranchCodeDisabled = true;
+        }
+        else
+        {
+            SaveSubmit = "hide";
+            FooterCol = "offset-sm-10";
+            IsBranchCodeDisabled = true;
+            IsDisabled = true;
+        }
+    }
+    public void Clear()
+    {
+        FooterCol = "offset-sm-8"; 
+        SaveSubmit = "show";
+        IsBranchCodeDisabled = false;
+        IsDisabled = false;
+    }
+}

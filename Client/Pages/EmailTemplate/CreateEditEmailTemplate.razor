@@ -1,0 +1,93 @@
+﻿@using Application.Models
+@using WebAPI
+@using NetcodeHub.Packages.Components.Validations.OnInput
+
+<UIModal Title="EmailTemplate" ModalSize="modal-lg" @ref="uiModal">
+    <EditForm Model="FormData" OnValidSubmit="Submit">
+        <DataAnnotationsValidator />
+        <div class="form">
+            <input type="hidden" id="id" @bind="FormData.Id" />
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Email For<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.EmailFor" Label="EmailFor" Type="text" class="form-control" disabled="@IsEmailForeDisabled" />
+                        <ValidationMessage For="@(() => FormData!.EmailFor)" />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <label class="form-label">Email Subject<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.EmailSubjest" Label="EmailSubjest" Type="text" class="form-control" disabled="@IsDisabled" />
+                        <ValidationMessage For="@(() => FormData!.EmailSubjest)" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="mb-3">
+                        <label class="form-label">Email Body<span class="text-danger">*</span></label>
+                        <TextArea @bind-Value="FormData.EmailBody" Label="EmailTemplateDesc" Type="text" class="form-control"  disabled="@IsDisabled" />
+                        <ValidationMessage For="@(() => FormData!.EmailBody)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2 @FooterCol">
+                <button type="button" class="btn btn-secondary btn btn-secondary w-100" data-dismiss="modal" @onclick="() => uiModal.CloseModal()">Close</button>
+            </div>
+            <div class="col-sm-2 @SaveSubmit">
+                <button type="submit" class="btn btn-primary btn btn-secondary w-100">Save</button>
+            </div>
+        </div>
+    </EditForm>
+</UIModal>
+
+@code {
+    [Parameter]
+    public CIVSUI.Pages.EmailTemplate.EmailTemplate ParentPage { get; set; }
+    private UIModal uiModal;
+    public EmailTemplateModel FormData = new();
+    private ReturnGenericStatus OutputData = new();
+    private bool IsDisabled;
+    private bool IsEmailForeDisabled;
+    private string FooterCol = "offset-sm-8";
+    private string SaveSubmit = "show";
+    public async Task Submit()
+    {
+        OutputData = await ParentPage.SaveEmailTemplate();
+        if (OutputData.StatusCode == "00")
+            uiModal.CloseModal();
+    }
+    public void CreateNew()
+    {
+        FormData = new();
+        Clear();
+        uiModal.ShowModal();
+    }
+    public void PopulateForm(EmailTemplateModel x,bool IsEdit)
+    {
+        FormData = x;
+        uiModal.ShowModal();
+        Clear();
+        if (IsEdit)
+        {
+            IsEmailForeDisabled = true;
+        }
+        else
+        {
+            SaveSubmit = "hide";
+            FooterCol = "offset-sm-10";
+            IsEmailForeDisabled = true;
+            IsDisabled = true;
+        }
+    }
+    public void Clear()
+    {
+        FooterCol = "offset-sm-8"; 
+        SaveSubmit = "show";
+        IsEmailForeDisabled = false;
+        IsDisabled = false;
+    }
+}

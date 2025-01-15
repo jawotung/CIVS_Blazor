@@ -1,0 +1,86 @@
+﻿@using Application.Models
+@using WebAPI
+@using NetcodeHub.Packages.Components.Validations.OnInput
+
+<UIModal Title="RejectReason" ModalSize="modal-md" @ref="uiModal">
+    <EditForm Model="FormData" OnValidSubmit="Submit">
+        <DataAnnotationsValidator />
+        <div class="form">
+            <input type="hidden" id="id" @bind="FormData.Id" />
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="mb-3">
+                        <label class="form-label">Reject Reason Code</label>
+                        <Text @bind-Value="FormData.RejectReasonCode" Label="RejectReasonCode" Type="text" class="form-control" disabled="@IsRejectReasonCodeDisabled" />
+                        <ValidationMessage For="@(() => FormData!.RejectReasonCode)" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="mb-3">
+                        <label class="form-label">RejectReason Desc<span class="text-danger">*</span></label>
+                        <Text @bind-Value="FormData.RejectReasonDesc" Label="RejectReasonDesc" Type="text" class="form-control"  disabled="@IsDisabled" />
+                        <ValidationMessage For="@(() => FormData!.RejectReasonDesc)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3 @FooterCol">
+                <button type="button" class="btn btn-secondary btn btn-secondary w-100" data-dismiss="modal" @onclick="() => uiModal.CloseModal()">Close</button>
+            </div>
+            <div class="col-sm-3 @SaveSubmit">
+                <button type="submit" class="btn btn-primary btn btn-secondary w-100">Save</button>
+            </div>
+        </div>
+    </EditForm>
+</UIModal>
+
+@code {
+    [Parameter]
+    public CIVSUI.Pages.RejectReason.RejectReason ParentPage { get; set; }
+    private UIModal uiModal;
+    public RejectReasonModel FormData = new();
+    private ReturnGenericStatus OutputData = new();
+    private bool IsDisabled;
+    private bool IsRejectReasonCodeDisabled;
+    private string FooterCol = "offset-sm-8";
+    private string SaveSubmit = "show";
+    public async Task Submit()
+    {
+        OutputData = await ParentPage.SaveRejectReason();
+        if (OutputData.StatusCode == "00")
+            uiModal.CloseModal();
+    }
+    public void CreateNew()
+    {
+        FormData = new();
+        Clear();
+        uiModal.ShowModal();
+    }
+    public void PopulateForm(RejectReasonModel x,bool IsEdit)
+    {
+        FormData = x;
+        uiModal.ShowModal();
+        Clear();
+        if (IsEdit)
+        {
+            IsRejectReasonCodeDisabled = true;
+        }
+        else
+        {
+            SaveSubmit = "hide";
+            FooterCol = "offset-sm-9";
+            IsRejectReasonCodeDisabled = true;
+            IsDisabled = true;
+        }
+    }
+    public void Clear()
+    {
+        FooterCol = "offset-sm-6"; 
+        SaveSubmit = "show";
+        IsRejectReasonCodeDisabled = false;
+        IsDisabled = false;
+    }
+}

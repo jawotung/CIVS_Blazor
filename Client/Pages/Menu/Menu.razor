@@ -1,0 +1,177 @@
+﻿@page "/Menu"
+@using Application.Models
+@using Application.Service
+@using WebAPI
+@using Microsoft.JSInterop
+
+<PageTitle>Menu</PageTitle>
+
+<h3 class="Page-Header">Menu List</h3>
+<div>
+    <div class="row">
+        <div class="col-2">
+            <button class="btn btn-success w-100 btn-sm" type="button" @onclick="() => Modal.CreateNew()"><i class="fa fa-plus"></i> Add</button>
+        </div>
+        <div class="col-2">
+            <button class="btn btn-warning w-100 btn-sm" type="button" @onclick="() => PrintMenu()"><i class="fa fa-print"></i> Print</button>
+        </div>
+    </div>
+    <div class="table-responsive-vh">
+        <table class="table table-striped table-hover table-bordered ">
+            <thead>
+                <tr class="table-dark">
+                    <th style="width: 20%;">Menu Code</th>
+                    <th style="width: 40%;">Menu Desc</th>
+                    <th style="width: 15%;">is Root Menu ?</th>
+                    <th style="width: 10%;">Deleted</th>
+                    <th style="width: 15%;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (MenuList != null)
+                    foreach (MenuModel x in MenuList)
+                    {
+                        <tr>
+                            <td style="width: 20%;">@x.MenuCode</td>
+                            <td style="width: 40%;">@x.MenuDesc</td>
+                            <td style="width: 15%;"><input type="checkbox" checked="@x.RootMenu" disabled/></td>
+                            <td style="width: 10%;"><input type="checkbox" checked="@x.Isdeleted" disabled /></td>
+                            <td style="width: 15%;">
+                                @if (!x.Isdeleted)
+                                {
+                                    <button type="button" class="btn btn-sm btn-info" @onclick="() => Modal.PopulateForm(x,true)"><i class="fa fa-edit"></i></button>
+                                    <button type="button" class="btn btn-sm btn-danger" @onclick="() => DeleteConfirmation(x.Id)"><i class="fa fa-trash"></i></button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-sm btn-success" @onclick="() => Modal.PopulateForm(x,false)"><i class="fa fa-eye"></i></button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                @if (MenuList.Count == 0)
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">No Data Available</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <UIPagination CurrentPage="page"
+                  TotalPages="Paginated.TotalPages"
+                  HasPreviousPage="Paginated.HasPreviousPage"
+                  HasNextPage="Paginated.HasNextPage"
+                  CountData="Paginated.CountData"
+                  OnPageChanged="GetMenuList" />
+</div>
+
+<CIVSUI.Pages.Menu.CreateEditMenu @ref="Modal" ParentPage="@this"></CIVSUI.Pages.Menu.CreateEditMenu>
+<ConfirmationToast @ref="Confirmation"
+                   ConfimationMsg="@ConfimationMsg"
+                   OnConfirm="DeleteMenu"
+                   IsVisible="@IsConfirmationModalVisible">
+</ConfirmationToast>
+<Toast @ref="Msg"></Toast>
+
+<LoadingModal @ref="MdlLoading" IsLoading="@isLoading"></LoadingModal>
+
+@inject IMenuServices MenuService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@code {
+    private CIVSUI.Pages.Menu.CreateEditMenu Modal { get; set; }
+    private Toast Msg { get; set; }
+    private ConfirmationToast Confirmation { get; set; }
+    private bool IsConfirmationModalVisible = false;
+    private string ConfimationMsg = string.Empty;
+    private LoadingModal MdlLoading;
+    private bool isLoading = true;
+    private PaginatedOutputServices<MenuModel> Paginated = new();
+    private List<MenuModel> MenuList = new();
+    private ReturnGenericStatus OutputData = new();
+    private MenuModel data;
+    private string SMenuCode;
+    private int page = 1;
+    private int ID;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Initialize();
+    }
+    protected async Task Initialize()
+    {
+        await GetMenuList(page);
+        StateHasChanged();
+    }
+    protected async Task GetMenuList(int Page)
+    {
+        isLoading = true;
+        page = Page;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        Paginated = await MenuService.GetMenuList(SMenuCode, page);
+        MenuList = Paginated.Data;
+        isLoading = false;
+    }
+    public async Task<ReturnGenericStatus> SaveMenu()
+    {
+        isLoading = true;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDictionary x = await MenuService.SaveMenu(Modal.FormData);
+        OutputData.StatusMessage = x.StatusMessage;
+        OutputData.StatusCode = x.StatusCode;
+        Msg.ShowMsg(OutputData);
+        if (OutputData.StatusCode == "00")
+            await Initialize();
+        else
+            isLoading = false;
+        return OutputData;
+    }
+    private void DeleteConfirmation(int id)
+    {
+        ConfimationMsg = "";
+        ID = id;
+        ConfimationMsg = "Are you sure you want to delete this?";
+        IsConfirmationModalVisible = true;
+    }
+    protected async Task DeleteMenu(bool IsConfirmed)
+    {
+        if (IsConfirmed)
+        {
+            isLoading = true;
+            string token = await GetAuth();
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            OutputData = await MenuService.DeleteMenu(ID);
+            Msg.ShowMsg(OutputData);
+            if (OutputData.StatusCode == "00")
+                await Initialize();
+            else
+                isLoading = false;
+        }
+        IsConfirmationModalVisible = false;
+        ID = 0;
+    }
+    protected async Task PrintMenu()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        isLoading = true;
+        ReturnGenericData<ReturnDownloadPDF> FileByte = await MenuService.PrintMenu();
+        isLoading = false;
+        if (FileByte.StatusCode == "00")
+        {
+            string base64Data = FileByte.Data.PdfDataBase64.Trim('"');
+            await JSRuntime.InvokeVoidAsync("downloadFile", "application/pdf", base64Data, FileByte.Data.FileName);
+        }
+        else
+        {
+            Msg.ShowMsg(new ReturnGenericStatus { StatusCode = FileByte.StatusCode, StatusMessage = FileByte.StatusMessage });
+        }
+    }
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+}

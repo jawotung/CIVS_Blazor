@@ -1,0 +1,169 @@
+﻿@page "/email-template"
+@using Application.Models
+@using Application.Service
+@using WebAPI
+@using Microsoft.JSInterop
+
+<PageTitle>EmailTemplate</PageTitle>
+
+<h3 class="Page-Header">Email Template</h3>
+<div>
+    <div class="row">
+        <div class="col-2">
+            <button class="btn btn-success w-100 btn-sm" type="button" @onclick="() => Modal.CreateNew()"><i class="fa fa-plus"></i> Add</button>
+        </div>
+    </div>
+    <div class="table-responsive-vh">
+        <table class="table table-striped table-hover table-bordered ">
+            <thead>
+                <tr class="table-dark">
+                    <th style="width: 20%;">Email For</th>
+                    <th style="width: 20%;">Email Subject</th>
+                    <th style="width: 45%;">Email Body</th>
+                    <th style="width: 15%;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (EmailTemplateModel x in EmailTemplateList)
+                {
+                    <tr>
+                        <td style="width: 20%;">@x.EmailFor</td>
+                        <td style="width: 20%;">@x.EmailSubjest</td>
+                        <td style="width: 45%;">@GetEmailBody(x.EmailBody)</td>
+                        <td style="width: 15%;">
+                            <button type="button" class="btn btn-sm btn-info" @onclick="() => Modal.PopulateForm(x,true)"><i class="fa fa-edit"></i></button>
+                            <button type="button" class="btn btn-sm btn-danger" @onclick="() => DeleteConfirmation(x.Id)"><i class="fa fa-trash"></i></button>
+                        </td>
+                    </tr>
+                }
+                @if (EmailTemplateList.Count == 0)
+                {
+                    <tr>
+                        <td colspan="4" class="text-center">No Data Available</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <UIPagination CurrentPage="page"
+                  TotalPages="Paginated.TotalPages"
+                  HasPreviousPage="Paginated.HasPreviousPage"
+                  HasNextPage="Paginated.HasNextPage"
+                  CountData="Paginated.CountData"
+                  OnPageChanged="GetEmailTemplateList" />
+</div>
+
+<CIVSUI.Pages.EmailTemplate.CreateEditEmailTemplate @ref="Modal" ParentPage="@this"></CIVSUI.Pages.EmailTemplate.CreateEditEmailTemplate>
+<ConfirmationToast @ref="Confirmation"
+                   ConfimationMsg="@ConfimationMsg"
+                   OnConfirm="DeleteEmailTemplate"
+                   IsVisible="@IsConfirmationModalVisible">
+</ConfirmationToast>
+<Toast @ref="Msg"></Toast>
+
+<LoadingModal @ref="MdlLoading" IsLoading="@isLoading"></LoadingModal>
+
+@inject IEmailTemplateServices EmailTemplateService
+@inject IJSRuntime JSRuntime
+@functions {
+    private MarkupString GetEmailBody(string x)
+    {
+        return new MarkupString(x);
+    }
+}
+@code {
+    private CIVSUI.Pages.EmailTemplate.CreateEditEmailTemplate Modal { get; set; }
+    private Toast Msg { get; set; }
+    private ConfirmationToast Confirmation { get; set; }
+    private bool IsConfirmationModalVisible = false;
+    private string ConfimationMsg = string.Empty;
+    private LoadingModal MdlLoading;
+    private bool isLoading = true;
+    private PaginatedOutputServices<EmailTemplateModel> Paginated = new();
+    private List<EmailTemplateModel> EmailTemplateList = new();
+    private ReturnGenericStatus OutputData = new();
+    private EmailTemplateModel data;
+    private string SEmailTemplateCode;
+    private int page = 1;
+    private int ID;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Initialize();
+    }
+    protected async Task Initialize()
+    {
+        page = 1;
+        await GetEmailTemplateList(page);
+        StateHasChanged();
+    }
+    protected async Task GetEmailTemplateList(int Page)
+    {
+        isLoading = true;
+        page = Page;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        Paginated = await EmailTemplateService.GetEmailTemplateList(SEmailTemplateCode, page);
+        EmailTemplateList = Paginated.Data;
+        isLoading = false;
+    }
+    public async Task<ReturnGenericStatus> SaveEmailTemplate()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        ReturnGenericDictionary x = await EmailTemplateService.SaveEmailTemplate(Modal.FormData);
+        OutputData.StatusMessage = x.StatusMessage;
+        OutputData.StatusCode = x.StatusCode;
+        Msg.ShowMsg(OutputData);
+        if (OutputData.StatusCode == "00")
+            await Initialize();
+        else
+            isLoading = false;
+        return OutputData;
+    }
+    private void DeleteConfirmation(int id)
+    {
+        ConfimationMsg = "";
+        ID = id;
+        ConfimationMsg = "Are you sure you want to delete this?";
+        IsConfirmationModalVisible = true;
+    }
+    protected async Task DeleteEmailTemplate(bool IsConfirmed)
+    {
+        if (IsConfirmed)
+        {
+            string token = await GetAuth();
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            OutputData = await EmailTemplateService.DeleteEmailTemplate(ID);
+            Msg.ShowMsg(OutputData);
+            if (OutputData.StatusCode == "00")
+                await Initialize();
+            else
+                isLoading = false;
+        }
+        IsConfirmationModalVisible = false;
+        ID = 0;
+    }
+    protected async Task PrintEmailTemplate()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        isLoading = true;
+        ReturnGenericData<ReturnDownloadPDF> FileByte = await EmailTemplateService.PrintEmailTemplate(SEmailTemplateCode);
+        isLoading = false;
+        if (FileByte.StatusCode == "00")
+        {
+            string base64Data = FileByte.Data.PdfDataBase64.Trim('"');
+            await JSRuntime.InvokeVoidAsync("downloadFile", "application/pdf", base64Data, FileByte.Data.FileName);
+        }
+        else
+        {
+            Msg.ShowMsg(new ReturnGenericStatus { StatusCode = FileByte.StatusCode, StatusMessage = FileByte.StatusMessage });
+        }
+    }
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+}

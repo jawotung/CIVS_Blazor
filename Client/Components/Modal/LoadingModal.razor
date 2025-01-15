@@ -1,0 +1,21 @@
+﻿<div class="modal @(IsLoading == true ? "show" : "")" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background-color: transparent;border: transparent;">
+            <div style="display: flex;justify-content: center;">
+                <div class="spinner-border text-primary" style="width: 15rem;height: 15rem;--bs-spinner-border-width: 2em;color: rgb(21 60 132) !important;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@if(IsLoading == true)
+{
+    <div class="modal-backdrop show"></div>
+}
+
+@code
+{
+    [Parameter]
+    public bool IsLoading { get; set; }
+}

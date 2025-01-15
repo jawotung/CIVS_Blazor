@@ -1,0 +1,436 @@
+﻿@page "/inward-clearing-cheque-report/{Key}"
+@using Application.Models
+@using Application.Service
+@using WebAPI
+@using Microsoft.JSInterop
+
+@{
+    if (!string.IsNullOrEmpty(Key))
+        Key = char.ToUpper(Key[0]) + Key.Substring(1);
+    string PAGEHEADERREPORT = "Signature Verification {0} Report";
+    string title = Key == "ReferToOfficer" ? "Next Level Approver" : Key.Split("^")[0];
+    if (Key.StartsWith("Acct"))
+    {
+        if (Key.Contains("Clsd"))
+            title = "Account Closed"; 
+
+        if (Key.Contains("Drmt"))
+            title = "Account Dormant"; 
+
+        if (Key.Contains("PnD"))
+            title = "Post No Debit"; 
+    }
+    string Header = string.Format(PAGEHEADERREPORT, title);
+    <PageTitle>@Header</PageTitle>
+    <h3 class="Page-Header">@Header</h3>
+
+}
+<div>
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="mb-3 row">
+                <label for="staticEmail" class="col-sm-4 col-form-label" style="font-weight: bold;padding-right: 0px;padding-left: 0px;">Date From</label>
+                <div class="col-sm-8" style="padding-right: 0px;padding-left: 0px;">
+                    <DateInput Value="@dateFromFilter" ValueChanged="OnDateFromFilterChanged" />
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="mb-3 row">
+                <label for="staticEmail" class="col-sm-4 col-form-label" style="font-weight: bold;padding-right: 0px;">Date To</label>
+                <div class="col-sm-8" style="padding-right: 0px;padding-left: 0px;">
+                    <DateInput Value="@dateToFilter" ValueChanged="OnDateToFilterChanged" />
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (Key.StartsWith("LargeAmount") || Key.StartsWith("WithTechnicalities") || Key.StartsWith("MCImages"))
+    {
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="mb-3 row">
+                    <label for="staticEmail" class="col-sm-2 col-form-label" style="font-weight: bold;padding-right: 0px;padding-left: 0px;">BRSTN</label>
+                    <div class="col-sm-5" style="padding-right: 0px;">
+                        <input type="text" @bind="BSRTNFilter" class="form-control" />
+                    </div>
+                    <div class="col-sm-5">
+                        <select class="form-control" @onchange="(e) => SelectBRSTN(e)">
+                            <option value="">-- Select --</option>
+                            @if (DDlBRSTNList != null)
+                                @foreach (SelectListItem x in DDlBRSTNList)
+                                {
+                                    <option value="@x.Value">@x.Text</option>
+                                }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col-sm-2">
+            <button class="btn btn-outline-success w-100 btn-sm" type="button" @onclick="() => Search()"><i class="fa fa-search"></i> Search</button>
+        </div>
+        <div class="col-sm-2">
+            <button class="btn btn-warning w-100 btn-sm" type="button" @onclick="() => PrintReport()"><i class="fa fa-print"></i> Print</button>
+        </div>
+    </div>
+    <div class="table-responsive-vh">
+        <table class="table table-striped table-hover table-bordered">
+            <thead>
+                <tr class="table-dark">
+                    @if (Key == "MCImages")
+                    {
+                        <th>Account Number</th>
+                        <th>Check Number</th>
+                        <th>Check Amount</th>
+                        <th>Branch Code</th>
+                        <th>Branch BRSTN</th>
+                        <th>Action</th>
+                    }
+                    else
+                    {
+                        @if (Key == "Upload")
+                        {
+                            <th>Branch Code</th>
+                            <th>Total Items</th>
+                            <th>Total Amount</th>
+                        }
+                        else
+                        {
+                            <th>Account Number</th>
+                            <th>Check Number</th>
+                            <th>Check Amount</th>
+                            @if (Key == "Open")
+                            {
+                                <th>Uploaded By</th>
+                                <th>Uploaded Date</th>
+                                <th>Effectivity Date</th>
+                            }
+                            @if (Key == "ReAssign")
+                            {
+                                <th>Verified By</th>
+                                <th>Verified Date</th>
+                                <th>Reassigned By</th>
+                                <th>ReAssign Reason</th>
+                                <th>Branch Code</th>
+                            }
+                            @if (Key == "Reject" || Key == "Accept" || Key.StartsWith("Acct"))
+                            {
+                                <th>Verified By</th>
+                                <th>Verified Date</th>
+                                <th>Reassigned By</th>
+                                <th>ReAssign Reason</th>
+                                <th>
+                                    @(Key.ToLower() == "accept" ? "Approved By" : "Rejected By")
+                                </th>
+                                <th>
+                                    @(Key.ToLower() == "reject" ? "Reject Reason" : "Reason")
+                                </th>
+                                <th>
+                                    @(Key.ToLower() == "accept" ? "Approved Date" : "Rejected Date")
+                                </th>
+                            }
+                            @if (Key == "ReferToOfficer")
+                            {
+                                <th>Verified By</th>
+                                <th>Verified Date</th>
+                                <th>Next level Approver</th>
+
+                            }
+                            @if (Key.StartsWith("LargeAmount"))
+                            {
+                                <th>Branch Code</th>
+                                <th>Branch Status</th>
+                                <th>C.Clrg. Status</th>
+                            }
+                            @if (Key == "WithTechnicalities")
+                            {
+                                <th>BranchBRSTN</th>
+                                <th>ReAssign Reason</th>
+                                <th>Reject Reason</th>
+                            }
+                        }
+                    }
+                </tr>
+            </thead>
+            <tbody>
+            @if (ReportList.Count > 0)
+            {
+                @if (Key == "MCImages")
+                {
+                    @foreach (InwardClearingReportModel x in ReportList)
+                    {
+                        <tr>
+                            <td>@x.AccountNumber</td>
+                            <td>@x.CheckNumber</td>
+                            <td align="right">@FormatNumberWithCommasAndDecimal(x.CheckAmount)</td>
+                            <td>@x.BranchCode</td>
+                            <td>@x.BranchBRSTN</td>
+                            <td>
+                                <button type="button" class="btn btn-success" @onclick="() => PopulateForm(x)"><i class="fa fa-eye"></i></button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    @foreach (InwardClearingReportModel x in ReportList)
+                    {
+                        <tr>
+                            @if (Key == "Upload")
+                            {
+                                <td>@x.BranchCode</td>
+                                <td>@x.TotalItems</td>
+                                <td>@x.TotalAmount</td>
+                            }
+                            else
+                            {
+                                <td>@x.AccountNumber</td>
+                                <td>@x.CheckNumber</td>
+                                <td align="right">@FormatNumberWithCommasAndDecimal(x.CheckAmount)</td>
+                                @if (Key == "Open")
+                                {
+                                    <td>@x.VerifiedBy</td>
+                                    <td>@x.VerifiedDateTime</td>
+                                    <td>@x.EffectivityDate</td>
+                                }
+                                @if (Key == "ReAssign")
+                                {
+                                    <td>@x.VerifiedBy</td>
+                                    <td>@x.VerifiedDateTime</td>
+                                    <td>@x.ReassignedBy</td>
+                                    <td>@x.ReAssignReason</td>
+                                    <td>@x.BranchCode</td>
+                                }
+                                @if (Key == "Reject" || Key == "Accept" || Key.StartsWith("Acct"))
+                                {
+                                    <td>@x.VerifiedBy</td>
+                                    <td>@x.VerifiedDateTime</td>
+                                    <td>@x.ReassignedBy</td>
+                                    <td>@x.ReAssignReason</td>
+                                    <td>@x.ApprovedBy</td>
+                                    <td>@x.RejectReason</td>
+                                    <td>@x.ApprovedDateTime</td>
+                                }
+                                @if (Key == "ReferToOfficer")
+                                {
+                                    <td>@x.VerifiedBy</td>
+                                    <td>@x.VerifiedDateTime</td>
+                                    <td>@x.ClearingOfficer</td>
+                                }
+                                @if (Key.StartsWith("LargeAmount"))
+                                {
+                                    <td>@x.BranchCode</td>
+                                    <td>
+                                        @if (x.ReAssignReason != "")
+                                        {
+                                            @if (x.CheckStatus == "Accept" || x.CheckStatus == "Reject")
+                                            {
+                                                <label class="text-info">@x.CheckStatus </label> <br />
+                                                @if (x.RejectReason != "")
+                                                {
+                                                    @x.RejectReason <br />
+                                                }
+                                                <label class="text-info">By</label> @x.ApprovedBy
+                                                <label class="text-info">On</label> @x.ApprovedDateTime
+                                            }
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (x.ReAssignReason != "")
+                                        {
+                                            <label class="text-info">Reassigned</label> <br /> @x.ReAssignReason <br />
+                                            <label class="text-info">By</label> @x.VerifiedBy
+                                            <label class="text-info">On</label> @x.VerifiedDateTime
+                                        }
+                                        else
+                                        {
+                                            <label class="text-info">@x.CheckStatus </label> <br />
+                                            @if (x.CheckStatus != "Open")
+                                            {
+                                                <label class="text-info">By</label> @x.ApprovedBy
+                                                <label class="text-info">On</label> @x.ApprovedDateTime
+                                            }
+                                        }
+                                    </td>
+                                }
+                                @if (Key == "WithTechnicalities")
+                                {
+                                    <td>@x.BranchBRSTN</td>
+                                    <td>@x.ReAssignReason</td>
+                                    <td>@x.RejectReason</td>
+                                }
+                            }
+                        </tr>
+                    }
+                }
+            }
+            else
+            {
+                int i = 0;
+                if (Key == "Accept" || Key == "Reject")
+                    i = 10;
+                else if (Key == "ReAssign")
+                    i = 8;
+                    else if (Key == "ReferToOfficer" || Key == "Open" || Key == "MCImages" || Key == "WithTechnicalities" || Key.Contains("LargeAmount"))
+                    i = 6;
+                else if (Key == "Upload")
+                    i = 3;
+
+                <tr>
+                    <td colspan="@i" class="text-center">No Data Available</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <UIPagination CurrentPage="page"
+                  TotalPages="Paginated.TotalPages"
+                  HasPreviousPage="Paginated.HasPreviousPage"
+                  HasNextPage="Paginated.HasNextPage"
+                  CountData="Paginated.CountData"
+                  OnPageChanged="GetReportList" />
+</div>
+
+<CIVSUI.Pages.InwardClearingCheque.ModalMCImages @ref="ModalMCImages" ParentPage="@this"></CIVSUI.Pages.InwardClearingCheque.ModalMCImages>
+<Toast @ref="Msg"></Toast>
+
+<LoadingModal @ref="MdlLoading" IsLoading="@isLoading"></LoadingModal>
+
+@inject IInwardClearingChequeReportServices InwardClearingChequeReportServices
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@code {
+    [Parameter]
+    public string Key { get; set; }
+    private Toast Msg { get; set; }
+    private LoadingModal MdlLoading;
+    private CIVSUI.Pages.InwardClearingCheque.ModalMCImages ModalMCImages { get; set; }
+    private PaginatedOutputServices<InwardClearingReportModel> Paginated = new();
+    private List<InwardClearingReportModel> ReportList = new();
+    private ReturnGenericStatus OutputData = new();
+    private DateTime dateFromFilter;
+    private DateTime dateToFilter;
+    private string BSRTNFilter;
+    private List<SelectListItem> DDlBRSTNList;
+    private int page = 1;
+    private bool isLoading = true;
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     await Initialize();
+    // }
+    protected override async Task OnParametersSetAsync()
+    {
+        await Initialize();
+        base.OnParametersSet();
+    }
+    protected async Task Initialize()
+    {
+        isLoading = true;
+        page = 1;
+        var currentDate = DateTime.Now.Date;
+
+        if (dateToFilter == default) // Prevent overwriting existing values
+            dateToFilter = currentDate;
+        if (dateFromFilter == default)
+            dateFromFilter = currentDate;
+        await GetReportList(page);
+        if (Key.StartsWith("LargeAmount") || Key.StartsWith("WithTechnicalities") || Key.StartsWith("MCImages"))
+            await GetBuddyBranches();
+        StateHasChanged();
+        isLoading = false;
+    }
+    protected async Task GetBuddyBranches()
+    {
+        if (DDlBRSTNList == null)
+        {
+            string token = await GetAuth();
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            ReturnGenericDropdown r = await InwardClearingChequeReportServices.GetBuddyBranches();
+            DDlBRSTNList = r.Data;
+        }
+    }
+    protected async Task Search()
+    {
+        page = 1;
+        await GetReportList(page);
+        StateHasChanged();
+    }
+    protected async Task GetReportList(int Page)
+    {
+        isLoading = true;
+        page = Page;
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        Paginated = await InwardClearingChequeReportServices.GetReportList(Key, page, dateFromFilter.ToString(), dateToFilter.ToString(), BSRTNFilter);
+        ReportList = Paginated.Data;
+        isLoading = false;
+    }
+    protected async Task PopulateForm(InwardClearingReportModel x)
+    {
+        isLoading = true;
+        ReturnGenericData<MCCheckDetailModel> r = await InwardClearingChequeReportServices.GetMCDetails(string.Format("{0}_{1}", x.AccountNumber, x.CheckNumber)); ;
+        if (r.StatusCode == "00")
+        {
+            MCCheckDetailModel HistoryData = r.Data;
+            if(HistoryData == null)
+            {
+                Msg.ShowMsg(new ReturnGenericStatus {StatusCode = "01" , StatusMessage = "No data displayed" });
+            }
+            else
+            {
+                ModalMCImages.PopulateForm(HistoryData);
+            }
+        }
+        else
+        {
+            Msg.ShowMsg(new ReturnGenericStatus { StatusCode = r.StatusCode, StatusMessage = r.StatusMessage });
+        }
+        isLoading = false;
+    }
+    protected async Task PrintReport()
+    {
+        string token = await GetAuth();
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        isLoading = true;
+        ReturnGenericData<ReturnDownloadPDF> FileByte = new ReturnGenericData<ReturnDownloadPDF>();
+        if (Key.StartsWith("LargeAmount") || Key.StartsWith("WithTechnicalities") || Key.StartsWith("MCImages"))
+            FileByte = await InwardClearingChequeReportServices.PrintReportWithImages(Key, dateFromFilter.ToString(), dateToFilter.ToString(), BSRTNFilter);
+        else
+            FileByte = await InwardClearingChequeReportServices.PrintReport(Key, dateFromFilter.ToString(), dateToFilter.ToString(), BSRTNFilter);
+        if (FileByte.StatusCode == "00")
+        {
+            string base64Data = FileByte.Data.PdfDataBase64.Trim('"');
+            await JSRuntime.InvokeVoidAsync("downloadFile", "application/pdf", base64Data, FileByte.Data.FileName);
+        }
+        else
+        {
+            Msg.ShowMsg(new ReturnGenericStatus { StatusCode = FileByte.StatusCode, StatusMessage = FileByte.StatusMessage });
+        }
+        isLoading = false;
+    }
+    private void SelectBRSTN(ChangeEventArgs e)
+    {
+        BSRTNFilter = e.Value.ToString();
+        StateHasChanged();
+    }
+    public string FormatNumberWithCommasAndDecimal(double number)
+    {
+        return number.ToString("N2"); // "N2" format specifier includes commas and 2 decimal places
+    }
+    private async Task<string> GetAuth()
+    {
+        return await localStorageService.GetItemAsStringAsync("auth")!;
+    }
+    private void OnDateFromFilterChanged(DateTime newDate)
+    {
+        dateFromFilter = newDate;
+    }
+
+    private void OnDateToFilterChanged(DateTime newDate)
+    {
+        dateToFilter = newDate;
+    }
+}

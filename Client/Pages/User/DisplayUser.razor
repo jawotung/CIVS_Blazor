@@ -1,0 +1,234 @@
+﻿@using Application.Models
+@using WebAPI
+@using NetcodeHub.Packages.Components.Validations.OnInput
+<div class="modal" tabindex="-1" role="dialog" style="@ModalStyle">
+    <div class="modal-dialog @ModalSize">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-4">@Title</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" @onclick="() => CloseModal()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @ChildContent
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@if (IsModalVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+@code {
+    [Parameter]
+    public string Title { get; set; }
+    [Parameter]
+    public string ModalSize { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private bool IsModalVisible { get; set; }
+
+    private string ModalStyle => IsModalVisible ? "display: block;" : "display: none;";
+
+
+    public void ShowModal()
+    {
+        IsModalVisible = true;
+    }
+
+    public void CloseModal()
+    {
+        IsModalVisible = false;
+    }
+}
+
+
+<UIModal Title="User" ModalSize="modal-lg" @ref="uiModal">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">User ID</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@FormData.UserId</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">EmployeeNumber</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@FormData.EmployeeNumber</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">User Name</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@FormData.UserDisplayName</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">User Type</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@FormData.UserTypeDesc</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">Branch of Assignment</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@FormData.BranchOfAssignmentDesc</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" checked="@FormData.Isdisabled" disabled style="opacity:100!important">
+                        <label class="form-check-label" for="flexCheckDefault" style="opacity:100!important">
+                            <label class="lblField">Disabled</label>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" checked="@FormData.Isdeleted" disabled style="opacity:100!important">
+                        <label class="form-check-label" for="flexCheckDefault" style="opacity:100!important">
+                            <label class="lblField">Deactivated</label>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label class="lblField">Last Login Date</label>
+                </div>
+                <div class="col-sm-6">
+                    <label class="lblValue">@FormData.LastLoginDate</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                @if (FormData.LastLoginDate.ToString("MM/dd/yyyy") != "01/01/0001")
+                {
+                    var disableDays = 30;
+                    var deactivateDays = 90;
+                    var lastLogin = FormData.LastLoginDate;
+                    var disabledDate = lastLogin.AddDays(disableDays);
+                    var deActivatedDate = lastLogin.AddDays(deactivateDays);
+                    @if (FormData.Isdisabled == false)
+                    {
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <label class="lblField">
+                                        No activity for @disableDays days Disable on
+                                    </label>
+                                </div>
+                                <div class="col-sm-12">
+                                    <label class="lblValue">@disabledDate</label>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (FormData.Isdeleted == false)
+                    {
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <label class="lblField">No activity for @deactivateDays days Deactivate on</label>
+                                </div>
+                                <div class="col-sm-12">
+                                    <label class="lblValue">@deActivatedDate</label>
+                                </div>
+                            </div>
+                        </div>
+                        <dt>No activity for @deactivateDays days Deactivate on</dt>
+                        <dd>
+
+                        </dd>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-2">
+            <button type="button" class="btn btn-secondary w-100" data-dismiss="modal" @onclick="() => uiModal.CloseModal()">Close</button>
+        </div>
+        @{
+            var disable = !(FormData.Isdisabled ?? false) ? "Disable" : "Enable";
+            var activation = !FormData.Isdeleted ? "Deactivate" : "Reactivate";
+            var btnClassDisable = !(FormData.Isdisabled ?? false) ? "btn-danger" : "btn-success";
+            var btnClassDeactivate = !FormData.Isdeleted ? "btn-danger" : "btn-success";
+            <div class="col-sm-2 ">
+                <button type="button" class="btn btn-primary w-100" @onclick="() => Edit()">Edit</button>
+            </div>
+            <div class="col-sm-2">
+                <button type="button" class="btn @btnClassDisable w-100" @onclick="() => Able(FormData.Id,(FormData.Isdisabled ?? false))">@disable</button>
+            </div>
+            <div class="col-sm-2">
+                <button type="button" class="btn @btnClassDeactivate w-100" @onclick="() => Activate(FormData.Id,FormData.Isdeleted)">@activation</button>
+            </div>
+        }
+    </div>
+</UIModal>
+
+@inject IUserServices UserServices
+@code {
+    [Parameter]
+    public CIVSUI.Pages.User.User ParentPage { get; set; }
+    private UIModal uiModal;
+    public UserModel FormData = new();
+
+    public void Display(UserModel x)
+    {
+        FormData = x;
+        uiModal.ShowModal();
+    }
+    protected async Task Edit()
+    {
+        uiModal.CloseModal();
+        await ParentPage.ModalPopulateForm(FormData, true);
+    }
+    protected void Able(int id, bool Isdisabled)
+    {
+        uiModal.CloseModal();
+        ParentPage.AbleConfirm(FormData.Id, Isdisabled);
+    }
+    protected void Activate(int id, bool Isdeleted)
+    {
+        uiModal.CloseModal();
+        ParentPage.ActiveConfirm(id, Isdeleted);
+    }
+}

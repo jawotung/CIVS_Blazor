@@ -1,0 +1,53 @@
+﻿@inject IJSRuntime JSRuntime
+
+<div class="modal" tabindex="-1" role="dialog" style="@ModalStyle">
+    <div class="modal-dialog @ModalSize">
+        <div class="modal-content modal-scroll-content">
+            <div class="modal-header" style="background-color: rgb(21 60 132); color: white; display: flex; justify-content: space-between; align-items: center;">
+                <h1 class="modal-title fs-4">@Title</h1>
+                <button type="button" data-bs-dismiss="modal" @onclick="CloseModal" aria-label="Close" style="background-color: transparent;border: none;color: white;">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                @ChildContent
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (IsModalVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public string ModalSize { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private bool IsModalVisible { get; set; }
+
+    private string ModalStyle => IsModalVisible ? "display: block;" : "display: none;";
+
+    public async Task ShowModal()
+    {
+        IsModalVisible = true;
+        await JSRuntime.InvokeVoidAsync("resetModalScroll", "modal-scroll-content");
+        StateHasChanged();
+    }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    public void CloseModal()
+    {
+        IsModalVisible = false;
+        StateHasChanged();
+    }
+}

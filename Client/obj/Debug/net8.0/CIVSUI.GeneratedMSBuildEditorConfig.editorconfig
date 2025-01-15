@@ -1,0 +1,207 @@
+is_global = true
+build_property.EnableAotAnalyzer = 
+build_property.EnableSingleFileAnalyzer = 
+build_property.EnableTrimAnalyzer = false
+build_property.IncludeAllContentForSelfExtract = 
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = false
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = browser
+build_property.RootNamespace = CIVSUI
+build_property.RootNamespace = CIVSUI
+build_property.ProjectDir = C:\Users\astung\Desktop\CBS Project\CIVS\Client\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = false
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\astung\Desktop\CBS Project\CIVS\Client
+build_property._RazorSourceGeneratorDebug = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Components/Form/DateInput.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGb3JtXERhdGVJbnB1dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Components/Form/DecimalInput.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGb3JtXERlY2ltYWxJbnB1dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Components/Form/DoubleInput.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGb3JtXERvdWJsZUlucHV0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Components/Modal/LoadingModal.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xNb2RhbFxMb2FkaW5nTW9kYWwucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Components/Modal/UIModal.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xNb2RhbFxVSU1vZGFsLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Components/Pagination/UIPagination.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdpbmF0aW9uXFVJUGFnaW5hdGlvbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/AmountLimits/AmountLimits.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQW1vdW50TGltaXRzXEFtb3VudExpbWl0cy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/AmountLimits/CreateEditAmountLimits.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQW1vdW50TGltaXRzXENyZWF0ZUVkaXRBbW91bnRMaW1pdHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/Auth/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aFxMb2dpbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/Auth/Logout.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aFxMb2dvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/BranchBuddy/BranchBuddy.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQnJhbmNoQnVkZHlcQnJhbmNoQnVkZHkucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/BranchBuddy/CreateEditBranchBuddy.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQnJhbmNoQnVkZHlcQ3JlYXRlRWRpdEJyYW5jaEJ1ZGR5LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/Branch/Branch.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQnJhbmNoXEJyYW5jaC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/Branch/CreateEditBranch.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQnJhbmNoXENyZWF0ZUVkaXRCcmFuY2gucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/EmailTemplate/CreateEditEmailTemplate.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRW1haWxUZW1wbGF0ZVxDcmVhdGVFZGl0RW1haWxUZW1wbGF0ZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/EmailTemplate/EmailTemplate.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRW1haWxUZW1wbGF0ZVxFbWFpbFRlbXBsYXRlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/GroupAccess/Details.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JvdXBBY2Nlc3NcRGV0YWlscy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/GroupAccess/Edit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JvdXBBY2Nlc3NcRWRpdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/GroupAccess/List.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JvdXBBY2Nlc3NcTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/GroupMember/Details.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JvdXBNZW1iZXJcRGV0YWlscy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/GroupMember/Edit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JvdXBNZW1iZXJcRWRpdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/GroupMember/List.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JvdXBNZW1iZXJcTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/Group/GroupList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JvdXBcR3JvdXBMaXN0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/Group/View.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JvdXBcVmlldy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/InwardClearingCheque/InwardClearingCheque.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW53YXJkQ2xlYXJpbmdDaGVxdWVcSW53YXJkQ2xlYXJpbmdDaGVxdWUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/InwardClearingCheque/ModalMCImages.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW53YXJkQ2xlYXJpbmdDaGVxdWVcTW9kYWxNQ0ltYWdlcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/InwardClearingCheque/Report.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW53YXJkQ2xlYXJpbmdDaGVxdWVcUmVwb3J0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/InwardClearingCheque/Upload.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW53YXJkQ2xlYXJpbmdDaGVxdWVcVXBsb2FkLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/Menu/CreateEditMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTWVudVxDcmVhdGVFZGl0TWVudS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/Menu/Menu.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTWVudVxNZW51LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/RejectReason/CreateEditRejectReason.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVqZWN0UmVhc29uXENyZWF0ZUVkaXRSZWplY3RSZWFzb24ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/RejectReason/RejectReason.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVqZWN0UmVhc29uXFJlamVjdFJlYXNvbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/UserAmountLimit/CreateEditUserAmountLimit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlckFtb3VudExpbWl0XENyZWF0ZUVkaXRVc2VyQW1vdW50TGltaXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/UserAmountLimit/UserAmountLimit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlckFtb3VudExpbWl0XFVzZXJBbW91bnRMaW1pdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/UserType/CreateEditUserType.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclR5cGVcQ3JlYXRlRWRpdFVzZXJUeXBlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/UserType/UserType.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclR5cGVcVXNlclR5cGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/User/CreateEditUser.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxDcmVhdGVFZGl0VXNlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/User/DisplayUser.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxEaXNwbGF5VXNlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Pages/User/User.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxVc2VyLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Components/Toast/ConfirmationToast.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xUb2FzdFxDb25maXJtYXRpb25Ub2FzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-4qh6scn40q
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Components/Toast/Toast.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xUb2FzdFxUb2FzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-qy1a3iqwdk
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-buqr5n42h1
+
+[C:/Users/astung/Desktop/CBS Project/CIVS/Client/Layout/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE5hdk1lbnUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-rkfdk8qr5q
